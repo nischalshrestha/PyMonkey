@@ -55,4 +55,4 @@ keywords = {
 }
 
 def lookup_ident(ident):
-    return keywords[ident] if ident in keywords else ident
+    return keywords[ident] if ident in keywords else IDENT
