@@ -1,5 +1,5 @@
-import lexer
-import tokens
+from monkey import token
+from monkey import lexer
 
 prompt = ">> "
 def start():
@@ -7,6 +7,6 @@ def start():
         line = input(prompt)
         l = lexer.new(line)
         tok = l.next_token()
-        while tok.Type != tokens.EOF:
+        while tok.Type != token.EOF:
             print(tok)
             tok = l.next_token()
