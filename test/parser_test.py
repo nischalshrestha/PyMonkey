@@ -15,14 +15,17 @@ class ParserTest(unittest.TestCase):
         #     ("let foobar = y;", "foobar", "y"),
         # ]
         source = 'let x = 5; let y = 10; let foobar = 838383;'
+        bad_source = 'let x 5; let = 10; let 838383;'
         tests = [
             ("let x = 5;", "x", 5),
             ("let y = 10;", "y", 10),
             ("let foobar = 838383;", "foobar", 838383),
         ]
+        # l = lexer.new(bad_source)
         l = lexer.new(source)
         p = parser.new(l)
         program = p.parse_program()
+        self.check_parse_errors(p)
         if program == None:
             print('parse_program() returned None')
             return
@@ -31,24 +34,33 @@ class ParserTest(unittest.TestCase):
             return
         for i, t in enumerate(tests):
             s = program.statements[i]
-            self.assertTrue(is_let_statement(s, t[1]))
+            self.assertTrue(self.is_let_statement(s, t[1]))
 
-# helper test function for test_let_statements
-def is_let_statement(s, name):
-    # ignores values for now
-    if s.token_literal() != 'let':
-        print("s.token_literal not 'let'. got={}".format(s.token_literal()))
-        return False
-    if type(s) != ast.LetStatement:
-        print("s is not a ast.LetStatement. got={}".format(type(s)))
-        return False
-    if s.name.value != name:
-        print("statement s value is not {}. got={}".format(name, s.name.value))
-        return False
-    if s.name.token_literal() != name:
-        print("statement s token is not {}. got={}".format(name, s.name.token_literal()))
-        return False
-    return True
+    def check_parse_errors(self, p):
+        errors = p.errors
+        if len(errors) == 0:
+            return
+        print('parser has {} errors'.format(len(errors)))
+        for e in errors:
+            print('parser error: {}'.format(e))
+        self.fail()
+
+    # helper test function for test_let_statements
+    def is_let_statement(self, s, name):
+        # ignores values for now
+        if s.token_literal() != 'let':
+            print("s.token_literal not 'let'. got={}".format(s.token_literal()))
+            return False
+        if type(s) != ast.LetStatement:
+            print("s is not a ast.LetStatement. got={}".format(type(s)))
+            return False
+        if s.name.value != name:
+            print("statement s value is not {}. got={}".format(name, s.name.value))
+            return False
+        if s.name.token_literal() != name:
+            print("statement s token is not {}. got={}".format(name, s.name.token_literal()))
+            return False
+        return True
 
 if __name__ == '__main__':
     unittest.main()

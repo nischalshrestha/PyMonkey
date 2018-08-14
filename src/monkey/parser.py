@@ -7,9 +7,11 @@ class Parser:
     lexer = None
     cur_token = None
     peek_token = None
+    errors = []
 
-    def __init__(self, lexer):
+    def __init__(self, lexer, errors=[]):
         self.lexer = lexer
+        self.errors = errors
         self.next_token()
         self.next_token()
 
@@ -27,6 +29,7 @@ class Parser:
         if self.peek_token_is(t):
             self.next_token()
             return True
+        self.peek_error(t)
         return False
 
     def parse_program(self):
@@ -53,6 +56,10 @@ class Parser:
         if not self.current_token_is(token.SEMICOLON):
             self.next_token()
         return statement
+
+    def peek_error(self, t):
+        msg = "expected token to be {}, got {} instead".format(t, self.peek_token.Type)
+        self.errors.append(msg)
 
 def new(lexer):
     return Parser(lexer)
