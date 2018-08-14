@@ -23,7 +23,7 @@ class Expression(Node):
 class Program(Node):
     statements = []
 
-    def __init__(self, statements):
+    def __init__(self, statements=[]):
         self.statements = statements
 
     def token_literal(self):
@@ -54,7 +54,7 @@ class LetStatement(Statement):
     name = None # Identifier
     value = None # Expression
 
-    def __init__(self, token, name, value):
+    def __init__(self, token, name=None, value=None):
         self.token = token
         self.name = name
         self.value = value

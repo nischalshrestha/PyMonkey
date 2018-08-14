@@ -31,25 +31,24 @@ class ParserTest(unittest.TestCase):
             return
         for i, t in enumerate(tests):
             s = program.statements[i]
-            print(t[1])
-            assertTrue(is_let_statement(s, t[1]))
+            self.assertTrue(is_let_statement(s, t[1]))
 
-    def is_let_statement(s, name):
-        if s.token_literal() != 'let':
-            print("s.token_literal not 'let'. got={}".format(s.token_literal()))
-            return False
-        if type(s) != type(ast.LetStatement):
-            print("s is not a 'ast.LetStatement'. got={}".format(s))
-            return False
-        if s.name.value != name:
-            print("statement s value is not {}. got={}".format(name, s.name.value))
-            return False
-        if s.name.token_literal() != name:
-            print("statement s token is not {}. got={}".format(name, s.name.token_literal()))
-            return False
-        return True
-
-    
+# helper test function for test_let_statements
+def is_let_statement(s, name):
+    # ignores values for now
+    if s.token_literal() != 'let':
+        print("s.token_literal not 'let'. got={}".format(s.token_literal()))
+        return False
+    if type(s) != ast.LetStatement:
+        print("s is not a ast.LetStatement. got={}".format(type(s)))
+        return False
+    if s.name.value != name:
+        print("statement s value is not {}. got={}".format(name, s.name.value))
+        return False
+    if s.name.token_literal() != name:
+        print("statement s token is not {}. got={}".format(name, s.name.token_literal()))
+        return False
+    return True
 
 if __name__ == '__main__':
     unittest.main()
