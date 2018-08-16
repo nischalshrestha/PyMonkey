@@ -61,6 +61,22 @@ class ParserTest(unittest.TestCase):
             print("statement s token is not {}. got={}".format(name, s.name.token_literal()))
             return False
         return True
+    
+    def test_return_statements(self):
+        source = 'return 5; return 10; return 993322;'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        if len(program.statements) != 3:
+            print('program.statements does not contain 3 statements. got={}'.format(len(program.statements)))
+            return
+        for s in program.statements:
+            if type(s) != ast.ReturnStatement:
+                self.fail("s is not a ast.ReturnStatement. got={}".format(type(s)))
+            if s.token_literal() != "return":
+                print("statement s token not 'return'. got={}".format(s.token_literal()))
+
 
 if __name__ == '__main__':
     unittest.main()
