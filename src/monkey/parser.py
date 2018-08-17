@@ -2,12 +2,25 @@ from monkey import token
 from monkey import lexer
 from monkey import ast
 
+from enum import Enum, auto
+
+class Precedence(Enum):
+    LOWEST = auto()
+    EQUALS = auto()     
+    LESSGREATER = auto()
+    SUM = auto()         
+    PRODUCT = auto()     
+    PREFIX = auto()      
+    CALL = auto()
+
 class Parser:
 
     lexer = None
     cur_token = None
     peek_token = None
     errors = []
+    prefix_parse_fns = {}
+    infix_parse_fns = {}
 
     def __init__(self, lexer, errors=[]):
         self.lexer = lexer
@@ -46,31 +59,62 @@ class Parser:
             return self.parse_let_statement()
         if self.cur_token.Type == token.RETURN:
             return self.parse_return_statement()
-        return None
+        return self.parse_expression_statement()
     
     def parse_let_statement(self):
-        statement = ast.LetStatement(self.cur_token)
+        stmt = ast.LetStatement(self.cur_token)
         if not self.expect_peek(token.IDENT):
             return None
-        statement.name = ast.Identifier(self.cur_token, self.cur_token.Literal)
+        stmt.name = ast.Identifier(self.cur_token, self.cur_token.Literal)
         if not self.expect_peek(token.ASSIGN):
             return None
         while not self.current_token_is(token.SEMICOLON):
             self.next_token()
-        return statement
+        return stmt
 
     def parse_return_statement(self):
-        statement = ast.ReturnStatement(self.cur_token)
+        stmt = ast.ReturnStatement(self.cur_token)
         self.next_token()
         while not self.current_token_is(token.SEMICOLON):
             self.next_token()
-        return statement
+        return stmt
+    
+    def parse_expression_statement(self):
+        stmt = ast.ExpressionStatement(self.cur_token)
+        stmt.expression = self.parse_expression(Precedence.LOWEST.value)
+        if self.peek_token_is(token.SEMICOLON):
+            self.next_token()
+        return stmt
+    
+    def parse_expression(self, precedence):
+        if self.cur_token.Type not in self.prefix_parse_fns:
+            return None
+        prefix = self.prefix_parse_fns[self.cur_token.Type]
+        left_exp = prefix()
+        return left_exp
+    
+    def parse_identifer(self):
+        return ast.Identifier(self.cur_token, self.cur_token.Literal)
 
     def peek_error(self, t):
         msg = "expected token to be {}, got {} instead".format(t, self.peek_token.Type)
         self.errors.append(msg)
+    
+    def register_prefix(self, token_type, fn):
+        self.prefix_parse_fns[token_type] = fn
+    
+    def register_infix(self, token_type, fn):
+        self.infix_parse_fns[token_type] = fn
         
+    def prefix_parse_fn(self):
+        pass
+    
+    def infix_parse_fn(self, expression):
+        pass
 
 def new(lexer):
-    return Parser(lexer)
+    p = Parser(lexer)
+    p.prefix_parse_fn = {}
+    p.register_prefix(token.IDENT, p.parse_identifer)
+    return p
     

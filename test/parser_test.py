@@ -76,6 +76,25 @@ class ParserTest(unittest.TestCase):
                 self.fail("s is not a ast.ReturnStatement. got={}".format(type(s)))
             if s.token_literal() != "return":
                 print("statement s token not 'return'. got={}".format(s.token_literal()))
+    
+    def test_identifier_expression(self):
+        source = 'foobar;'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        self.assertEqual(len(program.statements), 1, 
+            msg='program does not have enough statements. got={}'.format(len(program.statements)))
+        stmt = program.statements[0]
+        self.assertEqual(type(stmt), ast.ExpressionStatement,
+            msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+        ident = stmt.expression
+        self.assertEqual(type(ident), ast.Identifier,
+            msg='exp not ast.Identifier. got={}'.format(type(ident)))
+        self.assertEqual(ident.value, 'foobar',
+            msg='ident.value not {}. got={}'.format('foobar', ident.value))
+        self.assertEqual(ident.token_literal(), 'foobar',
+            msg='ident.token_literal not {}. got={}'.format('foobar', ident.token_literal()))
 
 
 if __name__ == '__main__':
