@@ -123,7 +123,7 @@ class IntegerLiteral(Expression):
         return self.token.Literal
     
     def string(self):
-        return self.value
+        return str(self.value)
 
 class PrefixExpression(Expression):
     token = None # Token
@@ -140,4 +140,23 @@ class PrefixExpression(Expression):
     
     def string(self):
         out = "(" + self.operator + self.right.string() + ")" 
+        return out
+
+class InfixExpression(Expression):
+    token = None # Token
+    left = None # Expression
+    operator = ""
+    right = None # Expression
+
+    def __init__(self, token, operator="", left=None, right=None):
+        self.token = token
+        self.left = left
+        self.operator = operator
+        self.right = right
+
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        out = "(" + self.left.string() + " " + self.operator + " " + self.right.string() + ")"
         return out

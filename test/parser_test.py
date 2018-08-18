@@ -114,6 +114,19 @@ class ParserTest(unittest.TestCase):
             msg='ident.value not {}. got={}'.format('5', literal.value))
         self.assertEqual(literal.token_literal(), '5',
             msg='ident.token_literal not {}. got={}'.format('5', literal.token_literal()))
+
+    def is_integer_literal(self, il, value):
+        integ = il
+        if type(integ) != ast.IntegerLiteral:
+            print('il not ast.IntegerLiteral. got={}'.format(type(integ)))
+            return False
+        if integ.value != value:
+            print('integ.value not {}. got={}'.format(value, integ.value))
+            return False
+        if integ.token_literal() != str(value):
+            print('integ.token_literal not {}. got={}'.format(value, integ.token_literal()))
+            return False
+        return True
     
     def test_parsing_prefix_expressions(self):
         prefix_tests = [
@@ -136,21 +149,59 @@ class ParserTest(unittest.TestCase):
             self.assertEqual(exp.operator, t[1],
                 msg='exp.operator not {}. got={}'.format(t[1], exp.operator))
             self.assertTrue(self.is_integer_literal(exp.right, t[2]))
+    
+    def test_parsing_infix_expressions(self):
+        infix_tests = [
+            ("5 + 5;", 5, "+", 5),
+            ("5 - 5;", 5, "-", 5),         
+            ("5 * 5;", 5, "*", 5),         
+            ("5 / 5;", 5, "/", 5),         
+            ("5 > 5;", 5, ">", 5),         
+            ("5 < 5;", 5, "<", 5),         
+            ("5 == 5;", 5, "==", 5),         
+            ("5 != 5;", 5, "!=", 5),
+        ]
+        for t in infix_tests:
+            l = lexer.new(t[0])
+            p = parser.new(l)
+            program = p.parse_program()
+            self.check_parse_errors(p)
+            self.assertEqual(len(program.statements), 1, 
+                msg='program does not have enough statements. got={}'.format(len(program.statements)))
+            stmt = program.statements[0]
+            self.assertEqual(type(stmt), ast.ExpressionStatement,
+                msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+            exp = stmt.expression
+            self.assertEqual(type(exp), ast.InfixExpression,
+                msg='exp not ast.InfixExpression. got={}'.format(type(exp)))
+            self.assertTrue(self.is_integer_literal(exp.left, t[1]))
+            self.assertEqual(exp.operator, t[2],
+                msg='exp.operator not {}. got={}'.format(t[2], exp.operator))
+            self.assertTrue(self.is_integer_literal(exp.right, t[1]))
 
-    def is_integer_literal(self, il, value):
-        integ = il
-        if type(integ) != ast.IntegerLiteral:
-            print('il not ast.IntegerLiteral. got={}'.format(type(integ)))
-            return False
-        if integ.value != value:
-            print('integ.value not {}. got={}'.format(value, integ.value))
-            return False
-        if integ.token_literal() != str(value):
-            print('integ.token_literal not {}. got={}'.format(value, integ.token_literal()))
-            return False
-        return True
-            
-
+    def test_operator_precedence_parsing(self):
+        tests = [
+            ("-a * b", "((-a) * b)"), 
+            ( "!-a", "(!(-a))"), 
+            ("a + b + c", "((a + b) + c)"),
+            ("a + b - c", "((a + b) - c)"), 
+            ("a * b * c", "((a * b) * c)"), 
+            ("a * b / c", "((a * b) / c)"), 
+            ("a + b / c", "(a + (b / c))"),
+            ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"), 
+            ("3 + 4; -5 * 5", "(3 + 4)((-5) * 5)"), 
+            ("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"),
+            ("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"), 
+            ("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+        ]
+        for t in tests:
+            l = lexer.new(t[0])
+            p = parser.new(l)
+            program = p.parse_program()
+            self.check_parse_errors(p)
+            actual = program.string()
+            self.assertEqual(actual, t[1],
+                msg='expected={}, got={}'.format(t[1], actual))
 
 if __name__ == '__main__':
     unittest.main()
