@@ -95,9 +95,20 @@ class Parser:
     
     def parse_identifer(self):
         return ast.Identifier(self.cur_token, self.cur_token.Literal)
+    
+    def parse_integer_literal(self):
+        lit = ast.IntegerLiteral(self.cur_token)
+        try:
+            value = int(self.cur_token.Literal)
+            lit.value = value
+            return lit
+        except ValueError:
+            msg = 'could not parse {} as integer'.format(self.cur_token)
+            self.errors.append(msg)
+            return None
 
     def peek_error(self, t):
-        msg = "expected token to be {}, got {} instead".format(t, self.peek_token.Type)
+        msg = 'expected token to be {}, got {} instead'.format(t, self.peek_token.Type)
         self.errors.append(msg)
     
     def register_prefix(self, token_type, fn):
@@ -114,7 +125,8 @@ class Parser:
 
 def new(lexer):
     p = Parser(lexer)
-    p.prefix_parse_fn = {}
+    p.prefix_parse_fns = {}
     p.register_prefix(token.IDENT, p.parse_identifer)
+    p.register_prefix(token.INT, p.parse_integer_literal)
     return p
     

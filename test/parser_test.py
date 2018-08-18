@@ -95,6 +95,25 @@ class ParserTest(unittest.TestCase):
             msg='ident.value not {}. got={}'.format('foobar', ident.value))
         self.assertEqual(ident.token_literal(), 'foobar',
             msg='ident.token_literal not {}. got={}'.format('foobar', ident.token_literal()))
+    
+    def test_integer_literal_expression(self):
+        source = '5;'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        self.assertEqual(len(program.statements), 1, 
+            msg='program does not have enough statements. got={}'.format(len(program.statements)))
+        stmt = program.statements[0]
+        self.assertEqual(type(stmt), ast.ExpressionStatement,
+            msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+        literal = stmt.expression
+        self.assertEqual(type(literal), ast.IntegerLiteral,
+            msg='exp not ast.IntegerLiteral. got={}'.format(type(literal)))
+        self.assertEqual(literal.value, 5,
+            msg='ident.value not {}. got={}'.format('5', literal.value))
+        self.assertEqual(literal.token_literal(), '5',
+            msg='ident.token_literal not {}. got={}'.format('5', literal.token_literal()))
 
 
 if __name__ == '__main__':
