@@ -88,6 +88,7 @@ class Parser:
     
     def parse_expression(self, precedence):
         if self.cur_token.Type not in self.prefix_parse_fns:
+            self.no_prefix_parse_fn_error(self.cur_token.Type)
             return None
         prefix = self.prefix_parse_fns[self.cur_token.Type]
         left_exp = prefix()
@@ -106,6 +107,16 @@ class Parser:
             msg = 'could not parse {} as integer'.format(self.cur_token)
             self.errors.append(msg)
             return None
+    
+    def parse_prefix_expression(self):
+        expression = ast.PrefixExpression(self.cur_token, self.cur_token.Literal)
+        self.next_token()
+        expression.right = self.parse_expression(Precedence.PREFIX.value)
+        return expression
+        
+    def no_prefix_parse_fn_error(self, token_type):
+        msg = "no prefix parse function for {} found".format(token_type)
+        self.errors.append(msg)
 
     def peek_error(self, t):
         msg = 'expected token to be {}, got {} instead'.format(t, self.peek_token.Type)
@@ -128,5 +139,7 @@ def new(lexer):
     p.prefix_parse_fns = {}
     p.register_prefix(token.IDENT, p.parse_identifer)
     p.register_prefix(token.INT, p.parse_integer_literal)
+    p.register_prefix(token.BANG, p.parse_prefix_expression)
+    p.register_prefix(token.MINUS, p.parse_prefix_expression)
     return p
     

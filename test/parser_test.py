@@ -114,6 +114,42 @@ class ParserTest(unittest.TestCase):
             msg='ident.value not {}. got={}'.format('5', literal.value))
         self.assertEqual(literal.token_literal(), '5',
             msg='ident.token_literal not {}. got={}'.format('5', literal.token_literal()))
+    
+    def test_parsing_prefix_expressions(self):
+        prefix_tests = [
+            ("!5;", "!", 5),
+            ("-15;", "-", 15)
+        ]
+        for t in prefix_tests:
+            l = lexer.new(t[0])
+            p = parser.new(l)
+            program = p.parse_program()
+            self.check_parse_errors(p)
+            self.assertEqual(len(program.statements), 1, 
+                msg='program does not have enough statements. got={}'.format(len(program.statements)))
+            stmt = program.statements[0]
+            self.assertEqual(type(stmt), ast.ExpressionStatement,
+                msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+            exp = stmt.expression
+            self.assertEqual(type(exp), ast.PrefixExpression,
+                msg='exp not ast.PrefixExpression. got={}'.format(type(exp)))
+            self.assertEqual(exp.operator, t[1],
+                msg='exp.operator not {}. got={}'.format(t[1], exp.operator))
+            self.assertTrue(self.is_integer_literal(exp.right, t[2]))
+
+    def is_integer_literal(self, il, value):
+        integ = il
+        if type(integ) != ast.IntegerLiteral:
+            print('il not ast.IntegerLiteral. got={}'.format(type(integ)))
+            return False
+        if integ.value != value:
+            print('integ.value not {}. got={}'.format(value, integ.value))
+            return False
+        if integ.token_literal() != str(value):
+            print('integ.token_literal not {}. got={}'.format(value, integ.token_literal()))
+            return False
+        return True
+            
 
 
 if __name__ == '__main__':
