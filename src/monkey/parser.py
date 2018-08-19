@@ -1,6 +1,7 @@
 from monkey import token
 from monkey import lexer
 from monkey import ast
+from monkey import parser_tracing
 
 from enum import Enum, auto
 
@@ -24,6 +25,7 @@ precedences = {
     token.ASTERISK: Precedence.PRODUCT.value,
 }
 
+# Uses Pratt Parsing
 class Parser:
 
     lexer = None
@@ -36,6 +38,7 @@ class Parser:
     def __init__(self, lexer, errors=[]):
         self.lexer = lexer
         self.errors = errors
+        # self.tracer = parser_tracing.ParserTracer()
 
     def next_token(self):
         self.cur_token = self.peek_token
@@ -89,34 +92,43 @@ class Parser:
         return stmt
     
     def parse_expression_statement(self):
+        # begin = self.tracer.trace('parse_expression_statement')
         stmt = ast.ExpressionStatement(self.cur_token)
         stmt.expression = self.parse_expression(Precedence.LOWEST.value)
         if self.peek_token_is(token.SEMICOLON):
             self.next_token()
+        # self.tracer.untrace(begin)
         return stmt
     
     def parse_expression(self, precedence):
+        # begin = self.tracer.trace('parse_expression')
         if self.cur_token.Type not in self.prefix_parse_fns:
             self.no_prefix_parse_fn_error(self.cur_token.Type)
+            # self.tracer.untrace(begin)
             return None
         prefix = self.prefix_parse_fns[self.cur_token.Type]
         left_exp = prefix()
         while not self.peek_token_is(token.SEMICOLON) and precedence < self.peek_precendence():
             if self.peek_token.Type not in self.infix_parse_fns:
+                # self.tracer.untrace(begin)
                 return left_exp
             infix = self.infix_parse_fns[self.peek_token.Type]
             self.next_token()
             left_exp = infix(left_exp)
+        # self.tracer.untrace(begin)
         return left_exp
     
     def parse_identifer(self):
+        # self.tracer.untrace(self.tracer.trace('parse_identifer'))
         return ast.Identifier(self.cur_token, self.cur_token.Literal)
     
     def parse_integer_literal(self):
+        # begin = self.tracer.trace('parse_integer_literal')
         lit = ast.IntegerLiteral(self.cur_token)
         try:
             value = int(self.cur_token.Literal)
             lit.value = value
+            # self.tracer.untrace(begin)
             return lit
         except ValueError:
             msg = 'could not parse {} as integer'.format(self.cur_token)
@@ -124,9 +136,11 @@ class Parser:
             return None
     
     def parse_prefix_expression(self):
+        # begin = self.tracer.trace('parse_prefix_expression')
         expression = ast.PrefixExpression(self.cur_token, self.cur_token.Literal)
         self.next_token()
         expression.right = self.parse_expression(Precedence.PREFIX.value)
+        # self.tracer.untrace(begin)
         return expression
         
     def no_prefix_parse_fn_error(self, token_type):
@@ -134,6 +148,7 @@ class Parser:
         self.errors.append(msg)
     
     def parse_infix_expression(self, left):
+        # begin = self.tracer.trace('parse_infix_expression')
         expression = ast.InfixExpression(
             self.cur_token, 
             self.cur_token.Literal, 
@@ -141,6 +156,7 @@ class Parser:
         precedence = self.cur_precendence()
         self.next_token()
         expression.right = self.parse_expression(precedence)
+        # self.tracer.untrace(begin)
         return expression
 
     def peek_error(self, t):
@@ -152,12 +168,6 @@ class Parser:
     
     def register_infix(self, token_type, fn):
         self.infix_parse_fns[token_type] = fn
-        
-    # def prefix_parse_fn(self):
-    #     pass
-    
-    # def infix_parse_fn(self, expression):
-    #     pass
 
     def peek_precendence(self):
         if self.peek_token.Type in precedences:
@@ -190,4 +200,3 @@ def new(lexer):
     p.next_token()
     p.next_token()
     return p
-    
