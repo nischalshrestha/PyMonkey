@@ -121,6 +121,18 @@ class ParserTest(unittest.TestCase):
             return False
         return True
     
+    def check_boolean_literal(self, exp, value):
+        if not type(exp) is ast.Boolean:
+            print('exp is not ast.Boolean. got={}'.format(type(exp)))
+            return False
+        if exp.value != value:
+            print('exp.value is {}. got={}'.format(value, exp.value))
+            return False
+        if exp.token_literal() != str(value).lower(): # this is bc bools in Python are caps
+            print('exp.token_literal is not {}. got={}'.format(value, exp.token_literal()))
+            return False
+        return True
+    
     def check_identifier(self, exp, value):
         if not type(exp) is ast.Identifier:
             print('exp is not ast.Identifier. got={}'.format(type(exp)))
@@ -139,13 +151,17 @@ class ParserTest(unittest.TestCase):
             return self.check_integer_literal(exp, expected)
         elif v is str:
             return self.check_identifier(exp, expected)
+        elif v is bool:
+            return self.check_boolean_literal(exp, expected)
         print('type of exp not handled. got={}'.format(type(expected)))
         return False
 
     def test_parsing_prefix_expressions(self):
         prefix_tests = [
             ("!5;", "!", 5),
-            ("-15;", "-", 15)
+            ("-15;", "-", 15),
+            ("!true;", "!", True),    
+            ("!false;", "!", False),
         ]
         for t in prefix_tests:
             l = lexer.new(t[0])
@@ -163,7 +179,6 @@ class ParserTest(unittest.TestCase):
             self.assertEqual(exp.operator, t[1],
                 msg='exp.operator not {}. got={}'.format(t[1], exp.operator))
             if not self.check_literal_expression(exp.right, t[2]):
-                print(exp.right)
                 return
     
     def test_parsing_infix_expressions(self):
@@ -176,6 +191,9 @@ class ParserTest(unittest.TestCase):
             ("5 < 5;", 5, "<", 5),         
             ("5 == 5;", 5, "==", 5),         
             ("5 != 5;", 5, "!=", 5),
+            ("true == true", True, "==", True),
+            # ("true != false", True, "!=", False),         
+            # ("false == false", False, "==", False),
         ]
         for t in infix_tests:
             l = lexer.new(t[0])
@@ -188,7 +206,6 @@ class ParserTest(unittest.TestCase):
             self.assertEqual(type(stmt), ast.ExpressionStatement,
                 msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
             if not self.check_infix_expression(stmt.expression, t[1], t[2], t[3]):
-                print(stmt.expression)
                 return
 
     def check_infix_expression(self, exp, left, operator, right):
@@ -220,6 +237,10 @@ class ParserTest(unittest.TestCase):
             ("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"),
             ("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"), 
             ("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+            ("true", "true"),
+            ("false", "false"),
+            ("3 > 5 == false", "((3 > 5) == false)"),
+            ("3 < 5 == true", "((3 < 5) == true)") 
         ]
         for t in tests:
             l = lexer.new(t[0])
