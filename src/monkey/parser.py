@@ -169,6 +169,34 @@ class Parser:
         # self.tracer.untrace(begin)
         return expression
     
+    def parse_if_expression(self):
+        expression = ast.IfExpression(self.cur_token)
+        if not self.expect_peek(token.LPAREN):
+            return None
+        self.next_token()
+        expression.condition = self.parse_expression(Precedence.LOWEST.value)
+        if not self.expect_peek(token.RPAREN):
+            return None
+        if not self.expect_peek(token.LBRACE):
+            return None
+        expression.consequence = self.parse_block_statement()
+        if self.peek_token_is(token.ELSE):
+            self.next_token()
+            if not self.expect_peek(token.LBRACE):
+                return None
+            expression.alternative = self.parse_block_statement()
+        return expression
+    
+    def parse_block_statement(self):
+        block = ast.BlockStatement(self.cur_token)
+        self.next_token()
+        while not self.current_token_is(token.RBRACE) and not self.current_token_is(token.EOF):
+            stmt = self.parse_statement()
+            if stmt != None:
+                block.statements.append(stmt)
+            self.next_token()
+        return block
+    
     def parse_boolean(self):
         return ast.Boolean(self.cur_token, self.current_token_is(token.TRUE))
 
@@ -203,6 +231,7 @@ def new(lexer):
     p.register_prefix(token.TRUE, p.parse_boolean)
     p.register_prefix(token.FALSE, p.parse_boolean)
     p.register_prefix(token.LPAREN, p.parse_grouped_expression)
+    p.register_prefix(token.IF, p.parse_if_expression)
     # infix
     p.register_infix(token.PLUS, p.parse_infix_expression) 
     p.register_infix(token.MINUS, p.parse_infix_expression) 

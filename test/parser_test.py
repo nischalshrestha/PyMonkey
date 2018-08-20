@@ -278,6 +278,76 @@ class ParserTest(unittest.TestCase):
             self.assertEqual(boolean, t[1],
                 msg='boolean.value not {}. got={}'.format(t[1], boolean))
 
+    def test_if_expression(self):
+        # tests = [
+        #     ("true;", True),
+        #     ("false;", False)
+        # ]
+        source = 'if (x < y) { x }'
+        # for t in tests:
+        # l = lexer.new(t[0])
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        self.assertEqual(len(program.statements), 1, 
+            msg='program does not have enough statements. got={}'.format(len(program.statements)))
+        stmt = program.statements[0]
+        self.assertEqual(type(stmt), ast.ExpressionStatement,
+            msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+        exp = stmt.expression
+        if not type(exp) is ast.IfExpression:
+            print('exp is not ast.IfExpression. got={}'.format(type(exp)))
+        if not self.check_infix_expression(exp.condition, 'x', '<', 'y'):
+            return
+        self.assertEqual(len(exp.consequence.statements), 1, 
+            msg='consequences does not have enough statements. got={}'.format(len(exp.consequence.statements)))
+        consequence = exp.consequence.statements[0]
+        if not type(consequence) is ast.ExpressionStatement:
+            print('statements[0] is not ast.ExpressionStatement. got={}'.format(type(consequence)))
+        if not self.check_identifier(consequence.expression, 'x'):
+            return
+        self.assertEqual(exp.alternative, None,
+            msg='exp.alternative.statements is not None. got={}'.format(exp.alternative))
+
+    def test_if_else_expression(self):
+        # tests = [
+        #     ("true;", True),
+        #     ("false;", False)
+        # ]
+        source = 'if (x < y) { x } else { y }'
+        # for t in tests:
+        # l = lexer.new(t[0])
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        self.assertEqual(len(program.statements), 1, 
+            msg='program does not have enough statements. got={}'.format(len(program.statements)))
+        stmt = program.statements[0]
+        self.assertEqual(type(stmt), ast.ExpressionStatement,
+            msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+        exp = stmt.expression
+        if not type(exp) is ast.IfExpression:
+            print('exp is not ast.IfExpression. got={}'.format(type(exp)))
+        if not self.check_infix_expression(exp.condition, 'x', '<', 'y'):
+            return
+        self.assertEqual(len(exp.consequence.statements), 1, 
+            msg='consequences does not have enough statements. got={}'.format(len(exp.consequence.statements)))
+        consequence = exp.consequence.statements[0]
+        if not type(consequence) is ast.ExpressionStatement:
+            print('statements[0] is not ast.ExpressionStatement. got={}'.format(type(consequence)))
+        if not self.check_identifier(consequence.expression, 'x'):
+            return
+        if len(exp.alternative.statements) != 1:
+            print("exp.alternative.statements does not contain 1 statements. got={}",
+                len(exp.alternative.statements))
+        alternative = exp.alternative.statements[0]
+        if not type(alternative) is ast.ExpressionStatement:
+            print('statements[0] is not ast.ExpressionStatement. got={}'.format(type(alternative)))
+        if not self.check_identifier(alternative.expression, "y"):
+            return
+
     def check_parse_errors(self, p):
         errors = p.errors
         if len(errors) == 0:
