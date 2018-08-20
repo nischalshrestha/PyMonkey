@@ -9,11 +9,11 @@ from monkey import parser
 class ParserTest(unittest.TestCase):
 
     def test_let_statements(self):
-        # tests = [
-        #     ("let x = 5;", "x", 5),
-        #     ("let y = true;", "y", True),
-        #     ("let foobar = y;", "foobar", "y"),
-        # ]
+        tests = [
+            ("let x = 5;", "x", 5),
+            ("let y = true;", "y", True),
+            ("let foobar = y;", "foobar", "y"),
+        ]
         source = 'let x = 5; let y = 10; let foobar = 838383;'
         bad_source = 'let x 5; let = 10; let 838383;'
         tests = [
@@ -21,20 +21,20 @@ class ParserTest(unittest.TestCase):
             ("let y = 10;", "y", 10),
             ("let foobar = 838383;", "foobar", 838383),
         ]
-        # l = lexer.new(bad_source)
-        l = lexer.new(source)
-        p = parser.new(l)
-        program = p.parse_program()
-        self.check_parse_errors(p)
-        if program == None:
-            print('parse_program() returned None')
-            return
-        if len(program.statements) != 3:
-            print('program.statements does not contain 3 statements. got={}'.format(len(program.statements)))
-            return
-        for i, t in enumerate(tests):
-            s = program.statements[i]
-            self.assertTrue(self.is_let_statement(s, t[1]))
+        for t in tests:
+            # l = lexer.new(bad_source)
+            l = lexer.new(t[0])
+            p = parser.new(l)
+            program = p.parse_program()
+            self.check_parse_errors(p)
+            if len(program.statements) != 1:
+                self.fail('program.statements does not contain 3 statements. got={}'.format(len(program.statements)))
+            stmt = program.statements[0]
+            if not self.is_let_statement(stmt, t[1]):
+                return
+            val = stmt.value
+            if not self.check_literal_expression(val, t[2]):
+                return
 
     def check_parse_errors(self, p):
         errors = p.errors
@@ -47,11 +47,10 @@ class ParserTest(unittest.TestCase):
 
     # helper test function for test_let_statements
     def is_let_statement(self, s, name):
-        # ignores values for now
         if s.token_literal() != 'let':
             print("s.token_literal not 'let'. got={}".format(s.token_literal()))
             return False
-        if type(s) != ast.LetStatement:
+        if not type(s) is ast.LetStatement:
             print("s is not a ast.LetStatement. got={}".format(type(s)))
             return False
         if s.name.value != name:
@@ -64,6 +63,7 @@ class ParserTest(unittest.TestCase):
     
     def test_return_statements(self):
         source = 'return 5; return 10; return 993322;'
+        expected = (5, 10, 993322)
         l = lexer.new(source)
         p = parser.new(l)
         program = p.parse_program()
@@ -71,11 +71,13 @@ class ParserTest(unittest.TestCase):
         if len(program.statements) != 3:
             print('program.statements does not contain 3 statements. got={}'.format(len(program.statements)))
             return
-        for s in program.statements:
-            if type(s) != ast.ReturnStatement:
+        for i, s in enumerate(program.statements):
+            if not type(s) is ast.ReturnStatement:
                 self.fail("s is not a ast.ReturnStatement. got={}".format(type(s)))
             if s.token_literal() != "return":
                 print("statement s token not 'return'. got={}".format(s.token_literal()))
+            if not self.check_literal_expression(s.return_value, expected[i]):
+                return
     
     def test_identifier_expression(self):
         source = 'foobar;'
@@ -115,9 +117,9 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(literal.token_literal(), '5',
             msg='ident.token_literal not {}. got={}'.format('5', literal.token_literal()))
 
-    def is_integer_literal(self, il, value):
+    def check_integer_literal(self, il, value):
         integ = il
-        if type(integ) != ast.IntegerLiteral:
+        if not type(integ) is ast.IntegerLiteral:
             print('il not ast.IntegerLiteral. got={}'.format(type(integ)))
             return False
         if integ.value != value:
@@ -128,6 +130,27 @@ class ParserTest(unittest.TestCase):
             return False
         return True
     
+    def check_identifier(self, exp, value):
+        if not type(exp) is ast.Identifier:
+            print('exp is not ast.Identifier. got={}'.format(type(exp)))
+            return False
+        if exp.value != value:
+            print('exp.value is {}. got={}'.format(value, exp.value))
+            return False
+        if exp.token_literal() != value:
+            print('exp.token_literal is not {}. got={}'.format(value, exp.token_literal()))
+            return False
+        return True
+    
+    def check_literal_expression(self, exp, expected):
+        v = type(expected)
+        if v is int:
+            return self.check_integer_literal(exp, expected)
+        elif v is str:
+            return self.check_identifier(exp, expected)
+        print('type of exp not handled. got={}'.format(type(expected)))
+        return False
+
     def test_parsing_prefix_expressions(self):
         prefix_tests = [
             ("!5;", "!", 5),
@@ -148,7 +171,9 @@ class ParserTest(unittest.TestCase):
                 msg='exp not ast.PrefixExpression. got={}'.format(type(exp)))
             self.assertEqual(exp.operator, t[1],
                 msg='exp.operator not {}. got={}'.format(t[1], exp.operator))
-            self.assertTrue(self.is_integer_literal(exp.right, t[2]))
+            if not self.check_literal_expression(exp.right, t[2]):
+                print(exp.right)
+                return
     
     def test_parsing_infix_expressions(self):
         infix_tests = [
@@ -171,13 +196,23 @@ class ParserTest(unittest.TestCase):
             stmt = program.statements[0]
             self.assertEqual(type(stmt), ast.ExpressionStatement,
                 msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
-            exp = stmt.expression
-            self.assertEqual(type(exp), ast.InfixExpression,
-                msg='exp not ast.InfixExpression. got={}'.format(type(exp)))
-            self.assertTrue(self.is_integer_literal(exp.left, t[1]))
-            self.assertEqual(exp.operator, t[2],
-                msg='exp.operator not {}. got={}'.format(t[2], exp.operator))
-            self.assertTrue(self.is_integer_literal(exp.right, t[1]))
+            if not self.check_infix_expression(stmt.expression, t[1], t[2], t[3]):
+                print(stmt.expression)
+                return
+
+    def check_infix_expression(self, exp, left, operator, right):
+        if not type(exp) is ast.InfixExpression:
+            print('exp is not ast.InfixExpression. got={}'.format(type(exp)))
+            return False
+        opExp = exp
+        if not self.check_literal_expression(opExp.left, left):
+            return False
+        if opExp.operator != operator:
+            print('exp.operator is not {}. got={}'.format(operator, opExp.operator))
+            return False
+        if not self.check_literal_expression(opExp.right, right):
+            return False
+        return True
 
     def test_operator_precedence_parsing(self):
         tests = [

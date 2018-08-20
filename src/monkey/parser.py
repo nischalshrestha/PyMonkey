@@ -80,14 +80,17 @@ class Parser:
         stmt.name = ast.Identifier(self.cur_token, self.cur_token.Literal)
         if not self.expect_peek(token.ASSIGN):
             return None
-        while not self.current_token_is(token.SEMICOLON):
+        self.next_token()
+        stmt.value = self.parse_expression(Precedence.LOWEST.value)
+        if self.peek_token_is(token.SEMICOLON):
             self.next_token()
         return stmt
 
     def parse_return_statement(self):
         stmt = ast.ReturnStatement(self.cur_token)
         self.next_token()
-        while not self.current_token_is(token.SEMICOLON):
+        stmt.return_value = self.parse_expression(Precedence.LOWEST.value)
+        if self.peek_token_is(token.SEMICOLON):
             self.next_token()
         return stmt
     
