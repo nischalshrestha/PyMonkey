@@ -30,23 +30,14 @@ class ParserTest(unittest.TestCase):
             if len(program.statements) != 1:
                 self.fail('program.statements does not contain 3 statements. got={}'.format(len(program.statements)))
             stmt = program.statements[0]
-            if not self.is_let_statement(stmt, t[1]):
+            if not self.check_let_statement(stmt, t[1]):
                 return
             val = stmt.value
             if not self.check_literal_expression(val, t[2]):
                 return
 
-    def check_parse_errors(self, p):
-        errors = p.errors
-        if len(errors) == 0:
-            return
-        print('parser has {} errors'.format(len(errors)))
-        for e in errors:
-            print('parser error: {}'.format(e))
-        self.fail()
-
     # helper test function for test_let_statements
-    def is_let_statement(self, s, name):
+    def check_let_statement(self, s, name):
         if s.token_literal() != 'let':
             print("s.token_literal not 'let'. got={}".format(s.token_literal()))
             return False
@@ -238,6 +229,37 @@ class ParserTest(unittest.TestCase):
             actual = program.string()
             self.assertEqual(actual, t[1],
                 msg='expected={}, got={}'.format(t[1], actual))
+    
+    def test_boolean_expression(self):
+        tests = [
+            ("true;", True),
+            ("false;", False)
+        ]
+        for t in tests:
+            l = lexer.new(t[0])
+            p = parser.new(l)
+            program = p.parse_program()
+            self.check_parse_errors(p)
+            self.assertEqual(len(program.statements), 1, 
+                msg='program does not have enough statements. got={}'.format(len(program.statements)))
+            stmt = program.statements[0]
+            self.assertEqual(type(stmt), ast.ExpressionStatement,
+                msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+            exp = stmt.expression
+            if not type(exp) is ast.Boolean:
+                print('exp is not ast.Boolean. got={}'.format(type(exp)))
+            boolean = exp.value
+            self.assertEqual(boolean, t[1],
+                msg='boolean.value not {}. got={}'.format(t[1], boolean))
+
+    def check_parse_errors(self, p):
+        errors = p.errors
+        if len(errors) == 0:
+            return
+        print('parser has {} errors'.format(len(errors)))
+        for e in errors:
+            print('parser error: {}'.format(e))
+        self.fail()
 
 if __name__ == '__main__':
     unittest.main()

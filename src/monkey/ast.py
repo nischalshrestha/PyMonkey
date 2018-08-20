@@ -160,3 +160,17 @@ class InfixExpression(Expression):
     def string(self):
         out = "(" + self.left.string() + " " + self.operator + " " + self.right.string() + ")"
         return out
+
+class Boolean(Expression):
+    token = None
+    value = False
+
+    def __init__(self, token, value):
+        self.token = token
+        self.value = value
+
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        return self.token.Literal

@@ -161,6 +161,9 @@ class Parser:
         expression.right = self.parse_expression(precedence)
         # self.tracer.untrace(begin)
         return expression
+    
+    def parse_boolean(self):
+        return ast.Boolean(self.cur_token, self.current_token_is(token.TRUE))
 
     def peek_error(self, t):
         msg = 'expected token to be {}, got {} instead'.format(t, self.peek_token.Type)
@@ -190,6 +193,8 @@ def new(lexer):
     p.register_prefix(token.INT, p.parse_integer_literal)
     p.register_prefix(token.BANG, p.parse_prefix_expression)
     p.register_prefix(token.MINUS, p.parse_prefix_expression)
+    p.register_prefix(token.TRUE, p.parse_boolean)
+    p.register_prefix(token.FALSE, p.parse_boolean)
     # infix
     p.register_infix(token.PLUS, p.parse_infix_expression) 
     p.register_infix(token.MINUS, p.parse_infix_expression) 
@@ -199,6 +204,7 @@ def new(lexer):
     p.register_infix(token.NOT_EQ, p.parse_infix_expression) 
     p.register_infix(token.LT, p.parse_infix_expression) 
     p.register_infix(token.GT, p.parse_infix_expression)
+
     # this sets both cur_token and peek_token
     p.next_token()
     p.next_token()
