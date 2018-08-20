@@ -192,8 +192,8 @@ class ParserTest(unittest.TestCase):
             ("5 == 5;", 5, "==", 5),         
             ("5 != 5;", 5, "!=", 5),
             ("true == true", True, "==", True),
-            # ("true != false", True, "!=", False),         
-            # ("false == false", False, "==", False),
+            ("true != false", True, "!=", False),         
+            ("false == false", False, "==", False),
         ]
         for t in infix_tests:
             l = lexer.new(t[0])
