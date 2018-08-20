@@ -240,7 +240,12 @@ class ParserTest(unittest.TestCase):
             ("true", "true"),
             ("false", "false"),
             ("3 > 5 == false", "((3 > 5) == false)"),
-            ("3 < 5 == true", "((3 < 5) == true)") 
+            ("3 < 5 == true", "((3 < 5) == true)"),
+            ("1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4)"), 
+            ("(5 + 5) * 2", "((5 + 5) * 2)"), 
+            ("2 / (5 + 5)", "(2 / (5 + 5))"), 
+            ("-(5 + 5)", "(-(5 + 5))"), 
+            ("!(true == true)", "(!(true == true))"),
         ]
         for t in tests:
             l = lexer.new(t[0])

@@ -121,6 +121,13 @@ class Parser:
         # self.tracer.untrace(begin)
         return left_exp
     
+    def parse_grouped_expression(self):
+        self.next_token()
+        exp = self.parse_expression(Precedence.LOWEST.value)
+        if not self.expect_peek(token.RPAREN):
+            return None
+        return exp
+    
     def parse_identifer(self):
         # self.tracer.untrace(self.tracer.trace('parse_identifer'))
         return ast.Identifier(self.cur_token, self.cur_token.Literal)
@@ -195,6 +202,7 @@ def new(lexer):
     p.register_prefix(token.MINUS, p.parse_prefix_expression)
     p.register_prefix(token.TRUE, p.parse_boolean)
     p.register_prefix(token.FALSE, p.parse_boolean)
+    p.register_prefix(token.LPAREN, p.parse_grouped_expression)
     # infix
     p.register_infix(token.PLUS, p.parse_infix_expression) 
     p.register_infix(token.MINUS, p.parse_infix_expression) 
@@ -204,7 +212,6 @@ def new(lexer):
     p.register_infix(token.NOT_EQ, p.parse_infix_expression) 
     p.register_infix(token.LT, p.parse_infix_expression) 
     p.register_infix(token.GT, p.parse_infix_expression)
-
     # this sets both cur_token and peek_token
     p.next_token()
     p.next_token()
