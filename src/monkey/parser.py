@@ -197,6 +197,34 @@ class Parser:
             self.next_token()
         return block
     
+    def parse_function_literal(self):
+        lit = ast.FunctionLiteral(self.cur_token)
+        if not self.expect_peek(token.LPAREN):
+            return None
+        lit.parameters = self.parse_function_parameters()
+        if not self.expect_peek(token.LBRACE):
+            return None
+        lit.body = self.parse_block_statement()
+        return lit
+    
+    def parse_function_parameters(self):
+        identifiers = []
+        # empty case
+        if self.peek_token_is(token.RPAREN):
+            self.next_token()
+            return identifiers
+        self.next_token()
+        ident = ast.Identifier(self.cur_token, self.cur_token.Literal)
+        identifiers.append(ident)
+        while self.peek_token_is(token.COMMA):
+            self.next_token() # consume last ident
+            self.next_token() # consume the comma
+            ident = ast.Identifier(self.cur_token, self.cur_token.Literal)
+            identifiers.append(ident)
+        if not self.expect_peek(token.RPAREN):
+            return None
+        return identifiers
+    
     def parse_boolean(self):
         return ast.Boolean(self.cur_token, self.current_token_is(token.TRUE))
 
@@ -232,6 +260,7 @@ def new(lexer):
     p.register_prefix(token.FALSE, p.parse_boolean)
     p.register_prefix(token.LPAREN, p.parse_grouped_expression)
     p.register_prefix(token.IF, p.parse_if_expression)
+    p.register_prefix(token.FUNCTION, p.parse_function_literal)
     # infix
     p.register_infix(token.PLUS, p.parse_infix_expression) 
     p.register_infix(token.MINUS, p.parse_infix_expression) 

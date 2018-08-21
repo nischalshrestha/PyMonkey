@@ -347,6 +347,49 @@ class ParserTest(unittest.TestCase):
             print('statements[0] is not ast.ExpressionStatement. got={}'.format(type(alternative)))
         if not self.check_identifier(alternative.expression, "y"):
             return
+    
+    def test_function_literal_parsing(self):
+        source = 'fn(x, y) { x + y; }'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        self.assertEqual(len(program.statements), 1, 
+            msg='program does not have enough statements. got={}'.format(len(program.statements)))
+        stmt = program.statements[0]
+        self.assertEqual(type(stmt), ast.ExpressionStatement,
+            msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+        function = stmt.expression
+        if not type(function) is ast.FunctionLiteral:
+            print('function is not ast.FunctionLiteral. got={}'.format(type(function)))
+        self.assertEqual(len(function.parameters), 2, 
+            msg='function literal parameters wrong. want 2, got={}'.format(len(function.parameters)))
+        self.check_literal_expression(function.parameters[0], 'x')
+        self.check_literal_expression(function.parameters[1], 'y')
+        self.assertEqual(len(function.body.statements), 1, 
+            msg='function.body.statements does not have 1 statement, got={}'.format(len(function.body.statements)))
+        body_stmt = function.body.statements[0]
+        if not type(body_stmt) is ast.ExpressionStatement:
+            print('function body statement is not ast.ExpressionStatement. got={}'.format(type(body_stmt)))
+        self.check_infix_expression(body_stmt.expression, 'x', '+', 'y')
+    
+    def test_function_parameter_parsing(self):
+        tests = [
+            ("fn() {};", []),
+            ("fn(x) {};", ['x']),
+            ("fn(x, y, z) {};", ['x', 'y', 'z'])
+        ]
+        for t in tests:
+            l = lexer.new(t[0])
+            p = parser.new(l)
+            program = p.parse_program()
+            self.check_parse_errors(p)
+            stmt = program.statements[0]
+            function = stmt.expression
+            self.assertEqual(len(function.parameters), len(t[1]),
+                msg='function literal parameters wrong. want {}, got={}'.format(len(t[1]), len(function.parameters)))
+            for i, ident in enumerate(t[1]):
+                self.check_literal_expression(function.parameters[i], ident)
 
     def check_parse_errors(self, p):
         errors = p.errors

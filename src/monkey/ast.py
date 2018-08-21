@@ -214,3 +214,27 @@ class BlockStatement(Statement):
         for s in self.statements:
             out = out + s.string()
         return out
+
+class FunctionLiteral(Expression):
+    token = None
+    parameters = [] # Identifier
+    body = None # BodyStatement
+
+    def __init__(self, token, parameters=None, body=None):
+        self.token = token
+        if parameters == None:
+            parameters = []
+        self.parameters = parameters
+        self.body = body
+
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        params  = ""
+        for p in self.parameters:
+            params = params + p.string()
+        params = params + self.token.Literal
+        params = params + "(" + ",".join(params) + ")"
+        params = params + self.body.string()
+        return params
