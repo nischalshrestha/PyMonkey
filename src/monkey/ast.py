@@ -238,3 +238,27 @@ class FunctionLiteral(Expression):
         params = params + "(" + ",".join(params) + ")"
         params = params + self.body.string()
         return params
+
+class CallExpression(Expression):
+
+    token = None
+    function = None # Identifier or FunctionLiteral
+    arguments = [] # Expression
+
+    def __init__(self, token, function=None, arguments=None):
+        self.token = token
+        self.function = function
+        if arguments == None:
+            arguments = []
+        self.arguments = arguments
+
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        args  = []
+        for a in self.arguments:
+            args.append(a.string())
+        out = "" + self.function.string()
+        out = out + "(" + ", ".join(args) + ")"
+        return out

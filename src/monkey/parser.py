@@ -23,6 +23,7 @@ precedences = {
     token.MINUS: Precedence.SUM.value,
     token.SLASH: Precedence.PRODUCT.value,
     token.ASTERISK: Precedence.PRODUCT.value,
+    token.LPAREN: Precedence.CALL.value
 }
 
 # Uses Pratt Parsing
@@ -113,6 +114,7 @@ class Parser:
         left_exp = prefix()
         while not self.peek_token_is(token.SEMICOLON) and precedence < self.peek_precendence():
             if self.peek_token.Type not in self.infix_parse_fns:
+                print(self.peek_token.Type)
                 # self.tracer.untrace(begin)
                 return left_exp
             infix = self.infix_parse_fns[self.peek_token.Type]
@@ -224,7 +226,27 @@ class Parser:
         if not self.expect_peek(token.RPAREN):
             return None
         return identifiers
-    
+
+    def parse_call_expression(self, function):
+        exp = ast.CallExpression(self.cur_token, function)
+        exp.arguments = self.parse_call_arguments()
+        return exp
+
+    def parse_call_arguments(self):
+        args = []
+        if self.peek_token_is(token.RPAREN):
+            self.next_token()
+            return args
+        self.next_token()
+        args.append(self.parse_expression(Precedence.LOWEST.value))
+        while self.peek_token_is(token.COMMA):
+            self.next_token()
+            self.next_token()
+            args.append(self.parse_expression(Precedence.LOWEST.value))
+        if not self.expect_peek(token.RPAREN):
+            return None
+        return args
+
     def parse_boolean(self):
         return ast.Boolean(self.cur_token, self.current_token_is(token.TRUE))
 
@@ -270,6 +292,7 @@ def new(lexer):
     p.register_infix(token.NOT_EQ, p.parse_infix_expression) 
     p.register_infix(token.LT, p.parse_infix_expression) 
     p.register_infix(token.GT, p.parse_infix_expression)
+    p.register_infix(token.LPAREN, p.parse_call_expression)
     # this sets both cur_token and peek_token
     p.next_token()
     p.next_token()

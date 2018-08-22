@@ -246,6 +246,9 @@ class ParserTest(unittest.TestCase):
             ("2 / (5 + 5)", "(2 / (5 + 5))"), 
             ("-(5 + 5)", "(-(5 + 5))"), 
             ("!(true == true)", "(!(true == true))"),
+            ("a + add(b * c) + d", "((a + add((b * c))) + d)"), 
+            ("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"), 
+            ("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))")
         ]
         for t in tests:
             l = lexer.new(t[0])
@@ -390,6 +393,51 @@ class ParserTest(unittest.TestCase):
                 msg='function literal parameters wrong. want {}, got={}'.format(len(t[1]), len(function.parameters)))
             for i, ident in enumerate(t[1]):
                 self.check_literal_expression(function.parameters[i], ident)
+    
+    def test_call_expression_parsing(self):
+        source = 'add(1, 2 * 3, 4 + 5);'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        self.assertEqual(len(program.statements), 1, 
+            msg='program does not have enough statements. got={}'.format(len(program.statements)))
+        stmt = program.statements[0]
+        self.assertEqual(type(stmt), ast.ExpressionStatement,
+            msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+        exp = stmt.expression
+        if not type(exp) is ast.CallExpression:
+            print('exp is not ast.CallExpression. got={}'.format(type(exp)))
+        if not self.check_identifier(exp.function, "add"):
+            return
+        self.assertEqual(len(exp.arguments), 3, 
+            msg='wrong lenght of arguments. want 3, got={}'.format(len(exp.arguments)))
+        self.check_literal_expression(exp.arguments[0], 1)
+        self.check_infix_expression(exp.arguments[1], 2, '*', 3)
+        self.check_infix_expression(exp.arguments[2], 4, '+', 5)
+    
+    def test_call_expression_parameter_parsing(self):
+        tests = [
+			("add();", "add", []),
+		    ("add(1);", "add", ["1"]),
+            ("add(1, 2 * 3, 4 + 5);", "add", ["1", "(2 * 3)", "(4 + 5)"])
+        ]
+        for t in tests:
+            l = lexer.new(t[0])
+            p = parser.new(l)
+            program = p.parse_program()
+            self.check_parse_errors(p)
+            stmt = program.statements[0]
+            exp = stmt.expression
+            if not type(exp) is ast.CallExpression:
+                print('stmt.Expression is not ast.CallExpression. got={}'.format(type(exp)))
+            if not self.check_identifier(exp.function, t[1]):
+                return
+            self.assertEqual(len(exp.arguments), len(t[2]), 
+                msg='wrong lenght of arguments. want={}, got={}'.format(len(t[2]), len(exp.arguments)))
+            for i, arg in enumerate(t[2]):
+                if exp.arguments[i].string() != arg:
+                    print("argument {} wrong. want={}, got={}".format(i, arg, exp.arguments[i].string()))
 
     def check_parse_errors(self, p):
         errors = p.errors
