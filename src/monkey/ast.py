@@ -231,13 +231,13 @@ class FunctionLiteral(Expression):
         return self.token.Literal
     
     def string(self):
-        params  = ""
+        params  = []
         for p in self.parameters:
-            params = params + p.string()
-        params = params + self.token.Literal
-        params = params + "(" + ",".join(params) + ")"
-        params = params + self.body.string()
-        return params
+            params.append(p.string())
+        out = "" + self.token.Literal
+        out = out + "(" + ", ".join(params) + ")"
+        out = out + self.body.string()
+        return out
 
 class CallExpression(Expression):
 
