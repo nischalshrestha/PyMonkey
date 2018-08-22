@@ -3,22 +3,18 @@ from monkey import token
 
 class Node:
     # this method used only for debugging
-    def token_literal(self):
-        pass
-    def string(self):
-        pass
+    def token_literal(self): pass
+    def string(self): pass
 
 class Statement(Node):
     node = None
     # dummy method
-    def statement_node(self):
-        pass
+    def statement_node(self): pass
 
 class Expression(Node):
     node = None
     # dummy method
-    def expression_node(self):
-        pass
+    def expression_node(self): pass
 
 class Program(Node):
     statements = []

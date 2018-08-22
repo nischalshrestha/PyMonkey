@@ -1,6 +1,7 @@
 from monkey import token
 from monkey import lexer
 from monkey import parser
+from monkey import evaluator
 
 prompt = ">> "
 MONKEY_FACE = '''
@@ -29,8 +30,10 @@ def start():
         if len(p.errors) != 0:
             print_parse_errors(p.errors)
         else:
-            print(program.string(), '\n')
-    
+            evaluated = evaluator.Eval(program)
+            if evaluated != None:
+                print(evaluated.inspect(), '\n')
+
 def print_parse_errors(errors):
     print(MONKEY_FACE)
     print('Woops! We ran into some monkey business here!\n')
