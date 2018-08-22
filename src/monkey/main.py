@@ -1,5 +1,7 @@
 import getpass
-import repl
+import sys
+sys.path.append("../")
+from monkey import repl
 
 def main():
     user = getpass.getuser()

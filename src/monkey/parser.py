@@ -36,8 +36,10 @@ class Parser:
     prefix_parse_fns = {}
     infix_parse_fns = {}
 
-    def __init__(self, lexer, errors=[]):
+    def __init__(self, lexer, errors=None):
         self.lexer = lexer
+        if errors == None:
+            errors = []
         self.errors = errors
         # self.tracer = parser_tracing.ParserTracer()
 
