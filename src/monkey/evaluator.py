@@ -55,6 +55,9 @@ def Eval(node):
         return Integer(node.value)
     if type(node) is ast.Boolean:
         return native_boolean_object(node.value)
+    if type(node) is ast.PrefixExpression:
+        right = Eval(node.right)
+        return eval_prefix_expression(node.operator, right)
     return None
 
 def eval_statements(statements):
@@ -62,6 +65,28 @@ def eval_statements(statements):
     for s in statements:
         result = Eval(s)
     return result
+
+def eval_prefix_expression(operator, right):
+    if operator == "!":
+        return eval_bang_operator_expression(right)
+    if operator == "-":
+        return eval_minus_prefix_operator(right)
+    return None
+
+def eval_bang_operator_expression(right):
+    if right == TRUE:
+        return FALSE
+    if right == FALSE:
+        return TRUE
+    if right == NULL:
+        return TRUE
+    return FALSE
+
+def eval_minus_prefix_operator(right):
+    if right.object_type() != INTEGER_OBJ:
+        return NULL
+    value = right.value
+    return Integer(-value)
 
 def native_boolean_object(boolean):
     if boolean:
