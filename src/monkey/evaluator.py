@@ -1,26 +1,6 @@
 from monkey import ast
 
 """
-Evaluator stuff
-"""
-
-# takes in ast.Node
-def Eval(node):
-    if type(node) is ast.Program:
-        return eval_statements(node.statements)
-    if type(node) is ast.ExpressionStatement:
-        return Eval(node.expression)
-    if type(node) is ast.IntegerLiteral:
-        return Integer(node.value)
-    return None
-
-def eval_statements(statements):
-    result = Object()
-    for s in statements:
-        result = Eval(s)
-    return result
-
-"""
 Object stuff
 """
 
@@ -57,6 +37,36 @@ class Boolean(Object):
     def inspect(self):
         return str(self.value)
 
+NULL = Null()
+TRUE  = Boolean(True) 
+FALSE = Boolean(False)
+
+"""
+Evaluator stuff
+"""
+
+# takes in ast.Node
+def Eval(node):
+    if type(node) is ast.Program:
+        return eval_statements(node.statements)
+    if type(node) is ast.ExpressionStatement:
+        return Eval(node.expression)
+    if type(node) is ast.IntegerLiteral:
+        return Integer(node.value)
+    if type(node) is ast.Boolean:
+        return native_boolean_object(node.value)
+    return None
+
+def eval_statements(statements):
+    result = Object()
+    for s in statements:
+        result = Eval(s)
+    return result
+
+def native_boolean_object(boolean):
+    if boolean:
+        return TRUE
+    return FALSE
 
 """
 Enviroment stuff
