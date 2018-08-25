@@ -95,8 +95,12 @@ def eval_minus_prefix_operator(right):
 def eval_infix_expression(operator, left, right):
     if left.object_type() == INTEGER_OBJ and right.object_type() == INTEGER_OBJ:
         return eval_integer_infix_expression(operator, left, right)
+    elif operator == "==":
+        return native_boolean_object(left == right)
+    elif operator == "!=":
+        return native_boolean_object(left != right)
     return None
-
+    
 def eval_integer_infix_expression(operator, left, right):
     left_val = left.value
     right_val = right.value
@@ -108,6 +112,14 @@ def eval_integer_infix_expression(operator, left, right):
         return Integer(left_val * right_val)
     elif operator == "/":
         return Integer(left_val / right_val)
+    elif operator == "<":
+        return native_boolean_object(left_val < right_val)
+    elif operator == ">":
+        return native_boolean_object(left_val > right_val)
+    elif operator == "==":
+        return native_boolean_object(left_val == right_val)
+    elif operator == "!=":
+        return native_boolean_object(left_val != right_val)
     return None
 
 def native_boolean_object(boolean):

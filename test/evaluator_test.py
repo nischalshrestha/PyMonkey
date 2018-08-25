@@ -51,7 +51,24 @@ class EvaluatorTest(unittest.TestCase):
     def test_eval_boolean_expression(self):
         tests = [
             ("true", True),
-            ("false", False)
+            ("false", False),
+            ("1 < 2", True),         
+            ("1 > 2", False),
+            ("1 < 1", False),         
+            ("1 > 1", False),         
+            ("1 == 1", True),         
+            ("1 != 1", False),         
+            ("1 == 2", False),         
+            ("1 != 2", True),
+            ("true == true", True),
+            ("false == false", True), 
+            ("true == false", False),  
+            ("true != false", True),
+            ("false != true", True),
+            ("(1 < 2) == true", True),
+            ("(1 < 2) == false", False),    
+            ("(1 > 2) == true", False),  
+            ("(1 > 2) == false", True),
         ]
         for t in tests:
             evaluated = self.check_eval(t[0])
