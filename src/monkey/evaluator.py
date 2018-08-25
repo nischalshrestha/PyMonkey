@@ -49,19 +49,23 @@ Evaluator stuff
 def Eval(node):
     if type(node) is ast.Program:
         return eval_statements(node.statements)
-    if type(node) is ast.ExpressionStatement:
+    elif type(node) is ast.ExpressionStatement:
         return Eval(node.expression)
-    if type(node) is ast.IntegerLiteral:
+    elif type(node) is ast.IntegerLiteral:
         return Integer(node.value)
-    if type(node) is ast.Boolean:
+    elif type(node) is ast.Boolean:
         return native_boolean_object(node.value)
-    if type(node) is ast.PrefixExpression:
+    elif type(node) is ast.PrefixExpression:
         right = Eval(node.right)
         return eval_prefix_expression(node.operator, right)
-    if type(node) is ast.InfixExpression:
+    elif type(node) is ast.InfixExpression:
         left = Eval(node.left)
         right = Eval(node.right)
         return eval_infix_expression(node.operator, left, right)
+    elif type(node) is ast.BlockStatement:
+        return eval_statements(node.statements)
+    elif type(node) is ast.IfExpression:
+        return eval_if_expression(node)
     return None
 
 def eval_statements(statements):
@@ -121,6 +125,23 @@ def eval_integer_infix_expression(operator, left, right):
     elif operator == "!=":
         return native_boolean_object(left_val != right_val)
     return None
+
+def eval_if_expression(ie):
+    condition = Eval(ie.condition)
+    if is_truthy(condition):
+        return Eval(ie.consequence)
+    elif ie.alternative != None:
+        return Eval(ie.alternative)
+    return NULL
+    
+def is_truthy(obj):
+    if obj == NULL:
+        return False
+    elif obj == TRUE:
+        return True
+    elif obj == FALSE:
+        return False
+    return True # number is truthy
 
 def native_boolean_object(boolean):
     if boolean:

@@ -95,6 +95,30 @@ class EvaluatorTest(unittest.TestCase):
         for t in tests:
             evaluated = self.check_eval(t[0])
             self.assertTrue(self.check_boolean_object(evaluated, t[1]))
+    
+    def test_if_else_expressions(self):
+        tests = [
+            ("if (true) { 10 }", 10),
+            ("if (false) { 10 }", None),
+            ("if (1) { 10 }", 10),
+            ("if (1 < 2) { 10 }", 10),
+            ("if (1 > 2) { 10 }", None),
+            ("if (1 > 2) { 10 } else { 20 }", 20),
+            ("if (1 < 2) { 10 } else { 20 }", 10),
+        ]
+        for t in tests:
+            evaluated = self.check_eval(t[0])
+            if type(t[1]) is int:
+                self.assertTrue(self.check_integer_object(evaluated, t[1]))
+            else:
+                self.assertTrue(self.check_null_object(evaluated))
+    
+    def check_null_object(self, obj):
+        if obj != e.NULL:
+            print('object is not NULL. got={}, {}'.format(type(obj), obj))
+            return False
+        return True
+
 
 if __name__ == '__main__':
     unittest.main()
