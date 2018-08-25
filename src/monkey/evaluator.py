@@ -7,6 +7,7 @@ Object stuff
 NULL_OBJ = 'NULL'
 INTEGER_OBJ = 'INTEGER'
 BOOLEAN_OBJ = 'BOOLEAN'
+RETURN_VALUE_OBJ = 'RETURN_VALUE'
 
 # object "interface"
 class Object:
@@ -37,6 +38,15 @@ class Boolean(Object):
     def inspect(self):
         return str(self.value)
 
+class ReturnValue(Object):
+    value = None # Object
+    def __init__(self, value=None):
+        self.value = value
+    def object_type(self):
+        return RETURN_VALUE_OBJ
+    def inspect(self):
+        return self.value.inspect()
+
 NULL = Null()
 TRUE  = Boolean(True) 
 FALSE = Boolean(False)
@@ -48,7 +58,7 @@ Evaluator stuff
 # takes in ast.Node
 def Eval(node):
     if type(node) is ast.Program:
-        return eval_statements(node.statements)
+        return eval_program(node)
     elif type(node) is ast.ExpressionStatement:
         return Eval(node.expression)
     elif type(node) is ast.IntegerLiteral:
@@ -63,15 +73,28 @@ def Eval(node):
         right = Eval(node.right)
         return eval_infix_expression(node.operator, left, right)
     elif type(node) is ast.BlockStatement:
-        return eval_statements(node.statements)
+        return eval_block_statement(node)
     elif type(node) is ast.IfExpression:
         return eval_if_expression(node)
+    elif type(node) is ast.ReturnStatement:
+        val = Eval(node.return_value)
+        return ReturnValue(val)
     return None
 
-def eval_statements(statements):
+def eval_program(program):
     result = Object()
-    for s in statements:
+    for s in program.statements:
         result = Eval(s)
+        if type(result) is ReturnValue:
+            return result.value
+    return result
+
+def eval_block_statement(block):
+    result = Object()
+    for statement in block.statements:
+        result = Eval(statement)
+        if result != None and result.object_type() == RETURN_VALUE_OBJ:
+            return result
     return result
 
 def eval_prefix_expression(operator, right):
@@ -133,7 +156,7 @@ def eval_if_expression(ie):
     elif ie.alternative != None:
         return Eval(ie.alternative)
     return NULL
-    
+
 def is_truthy(obj):
     if obj == NULL:
         return False

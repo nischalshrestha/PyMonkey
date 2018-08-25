@@ -119,6 +119,17 @@ class EvaluatorTest(unittest.TestCase):
             return False
         return True
 
+    def test_return_statements(self):
+        tests = [
+            ("return 10;", 10),
+            ("return 10; 9;", 10),
+            ("return 2 * 5; 9;", 10),
+            ("9; return 2 * 5; 9;", 10),
+            ("if (10 > 1) { if (10 > 1) { return 10; } return 1; }", 10),
+        ]
+        for t in tests:
+            evaluated = self.check_eval(t[0])
+            self.assertTrue(self.check_integer_object(evaluated, t[1]))
 
 if __name__ == '__main__':
     unittest.main()
