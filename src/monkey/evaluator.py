@@ -58,6 +58,10 @@ def Eval(node):
     if type(node) is ast.PrefixExpression:
         right = Eval(node.right)
         return eval_prefix_expression(node.operator, right)
+    if type(node) is ast.InfixExpression:
+        left = Eval(node.left)
+        right = Eval(node.right)
+        return eval_infix_expression(node.operator, left, right)
     return None
 
 def eval_statements(statements):
@@ -87,6 +91,24 @@ def eval_minus_prefix_operator(right):
         return NULL
     value = right.value
     return Integer(-value)
+
+def eval_infix_expression(operator, left, right):
+    if left.object_type() == INTEGER_OBJ and right.object_type() == INTEGER_OBJ:
+        return eval_integer_infix_expression(operator, left, right)
+    return None
+
+def eval_integer_infix_expression(operator, left, right):
+    left_val = left.value
+    right_val = right.value
+    if operator == "+":
+        return Integer(left_val + right_val)
+    elif operator == "-":
+        return Integer(left_val - right_val)
+    elif operator == "*":
+        return Integer(left_val * right_val)
+    elif operator == "/":
+        return Integer(left_val / right_val)
+    return None
 
 def native_boolean_object(boolean):
     if boolean:
