@@ -115,7 +115,7 @@ class EvaluatorTest(unittest.TestCase):
     
     def check_null_object(self, obj):
         if obj != e.NULL:
-            print('object is not NULL. got={}, {}'.format(type(obj), obj))
+            print('object is not NULL. got={}({})'.format(type(obj), obj))
             return False
         return True
 
@@ -130,6 +130,25 @@ class EvaluatorTest(unittest.TestCase):
         for t in tests:
             evaluated = self.check_eval(t[0])
             self.assertTrue(self.check_integer_object(evaluated, t[1]))
+        
+    def test_error_handling(self):
+        tests = [
+            ("5 + true;", "type mismatch: INTEGER + BOOLEAN"),
+            ("5 + true; 5;", "type mismatch: INTEGER + BOOLEAN"),
+            ("-true", "unknown operator: -BOOLEAN"),
+            ("true + false;", "unknown operator: BOOLEAN + BOOLEAN"),
+            ("5; true + false; 5;", "unknown operator: BOOLEAN + BOOLEAN"),
+            ("if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"),
+            ("if (10 > 1) { if (10 > 1) { return true + false; } return 1; }", "unknown operator: BOOLEAN + BOOLEAN"),
+        ]
+        for t in tests:
+            evaluated = self.check_eval(t[0])
+            if not type(evaluated) is e.Error:
+                print("no error object returned. got={}({})".format(type(evaluated), evaluated))
+                continue
+            self.assertEqual(evaluated.message, t[1], 
+                msg="wrong error message. expected={}, got={}".format(t[1], evaluated.message))
+            
 
 if __name__ == '__main__':
     unittest.main()

@@ -8,6 +8,7 @@ NULL_OBJ = 'NULL'
 INTEGER_OBJ = 'INTEGER'
 BOOLEAN_OBJ = 'BOOLEAN'
 RETURN_VALUE_OBJ = 'RETURN_VALUE'
+ERROR_OBJ = 'ERROR'
 
 # object "interface"
 class Object:
@@ -47,6 +48,15 @@ class ReturnValue(Object):
     def inspect(self):
         return self.value.inspect()
 
+class Error(Object):
+    message = None # Object
+    def __init__(self, message=None):
+        self.message = message
+    def object_type(self):
+        return ERROR_OBJ
+    def inspect(self):
+        return 'ERROR: '+ self.message
+
 NULL = Null()
 TRUE  = Boolean(True) 
 FALSE = Boolean(False)
@@ -67,10 +77,16 @@ def Eval(node):
         return native_boolean_object(node.value)
     elif type(node) is ast.PrefixExpression:
         right = Eval(node.right)
+        if is_error(right):
+            return right
         return eval_prefix_expression(node.operator, right)
     elif type(node) is ast.InfixExpression:
         left = Eval(node.left)
+        if is_error(left):
+            return left
         right = Eval(node.right)
+        if is_error(right):
+            return right
         return eval_infix_expression(node.operator, left, right)
     elif type(node) is ast.BlockStatement:
         return eval_block_statement(node)
@@ -78,8 +94,15 @@ def Eval(node):
         return eval_if_expression(node)
     elif type(node) is ast.ReturnStatement:
         val = Eval(node.return_value)
+        if is_error(val):
+            return val
         return ReturnValue(val)
     return None
+
+def is_error(obj):
+    if obj != None:
+        return obj.object_type() == ERROR_OBJ
+    return False
 
 def eval_program(program):
     result = Object()
@@ -87,13 +110,16 @@ def eval_program(program):
         result = Eval(s)
         if type(result) is ReturnValue:
             return result.value
+        if type(result) is Error:
+            return result
     return result
 
 def eval_block_statement(block):
     result = Object()
     for statement in block.statements:
         result = Eval(statement)
-        if result != None and result.object_type() == RETURN_VALUE_OBJ:
+        rt = result.object_type()
+        if rt == RETURN_VALUE_OBJ or rt == ERROR_OBJ:
             return result
     return result
 
@@ -102,7 +128,7 @@ def eval_prefix_expression(operator, right):
         return eval_bang_operator_expression(right)
     if operator == "-":
         return eval_minus_prefix_operator(right)
-    return None
+    return new_error("unknown operator: {}{}".format(operator, right.object_type()))
 
 def eval_bang_operator_expression(right):
     if right == TRUE:
@@ -115,7 +141,7 @@ def eval_bang_operator_expression(right):
 
 def eval_minus_prefix_operator(right):
     if right.object_type() != INTEGER_OBJ:
-        return NULL
+        return new_error("unknown operator: -{}".format(right.object_type()))
     value = right.value
     return Integer(-value)
 
@@ -126,7 +152,9 @@ def eval_infix_expression(operator, left, right):
         return native_boolean_object(left == right)
     elif operator == "!=":
         return native_boolean_object(left != right)
-    return None
+    elif left.object_type() != right.object_type():
+        return new_error("type mismatch: {} {} {}".format(left.object_type(), operator, right.object_type()))     
+    return new_error("unknown operator: {} {} {}".format(left.object_type(), operator, right.object_type()))
     
 def eval_integer_infix_expression(operator, left, right):
     left_val = left.value
@@ -147,7 +175,7 @@ def eval_integer_infix_expression(operator, left, right):
         return native_boolean_object(left_val == right_val)
     elif operator == "!=":
         return native_boolean_object(left_val != right_val)
-    return None
+    return new_error("unknown operator: {}{}{}".format(left, operator, right.object_type()))
 
 def eval_if_expression(ie):
     condition = Eval(ie.condition)
@@ -171,6 +199,9 @@ def native_boolean_object(boolean):
         return TRUE
     return FALSE
 
+def new_error(string):
+    return Error(string)
+
 """
-Enviroment stuff
+Environment stuff
 """
