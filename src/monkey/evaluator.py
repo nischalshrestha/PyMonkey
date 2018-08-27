@@ -128,7 +128,7 @@ def eval_prefix_expression(operator, right):
         return eval_bang_operator_expression(right)
     if operator == "-":
         return eval_minus_prefix_operator(right)
-    return new_error("unknown operator: {}{}".format(operator, right.object_type()))
+    return new_error(f"unknown operator: {operator}{right.object_type()}")
 
 def eval_bang_operator_expression(right):
     if right == TRUE:
@@ -141,7 +141,7 @@ def eval_bang_operator_expression(right):
 
 def eval_minus_prefix_operator(right):
     if right.object_type() != INTEGER_OBJ:
-        return new_error("unknown operator: -{}".format(right.object_type()))
+        return new_error(f"unknown operator: -{right.object_type()}")
     value = right.value
     return Integer(-value)
 
@@ -153,8 +153,8 @@ def eval_infix_expression(operator, left, right):
     elif operator == "!=":
         return native_boolean_object(left != right)
     elif left.object_type() != right.object_type():
-        return new_error("type mismatch: {} {} {}".format(left.object_type(), operator, right.object_type()))     
-    return new_error("unknown operator: {} {} {}".format(left.object_type(), operator, right.object_type()))
+        return new_error(f"type mismatch: {left.object_type()} {operator} {right.object_type()}")
+    return new_error(f"unknown operator: {left.object_type()} {operator} {right.object_type()}")
     
 def eval_integer_infix_expression(operator, left, right):
     left_val = left.value
@@ -175,7 +175,7 @@ def eval_integer_infix_expression(operator, left, right):
         return native_boolean_object(left_val == right_val)
     elif operator == "!=":
         return native_boolean_object(left_val != right_val)
-    return new_error("unknown operator: {}{}{}".format(left, operator, right.object_type()))
+    return new_error(f"unknown operator: {left} {operator} {right.object_type()}")
 
 def eval_if_expression(ie):
     condition = Eval(ie.condition)
