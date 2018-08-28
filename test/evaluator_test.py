@@ -37,7 +37,8 @@ class EvaluatorTest(unittest.TestCase):
         l = lexer.new(source)
         p = parser.new(l)
         program = p.parse_program()
-        return e.Eval(program)
+        env = e.new_environment()
+        return e.Eval(program, env)
 
     def check_integer_object(self, obj, expected):
         if not type(obj) is e.Integer:
@@ -140,6 +141,7 @@ class EvaluatorTest(unittest.TestCase):
             ("5; true + false; 5;", "unknown operator: BOOLEAN + BOOLEAN"),
             ("if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"),
             ("if (10 > 1) { if (10 > 1) { return true + false; } return 1; }", "unknown operator: BOOLEAN + BOOLEAN"),
+            ("foobar", "identifier not found: foobar")
         ]
         for t in tests:
             evaluated = self.check_eval(t[0])
@@ -148,7 +150,17 @@ class EvaluatorTest(unittest.TestCase):
                 continue
             self.assertEqual(evaluated.message, t[1], 
                 msg="wrong error message. expected={}, got={}".format(t[1], evaluated.message))
-            
+
+    def test_let_statements(self):
+        tests = [
+            ("let a = 5; a;", 5),
+            ("let a = 5 * 5; a;", 25),
+            ("let a = 5; let b = a; b;", 5),
+            ("let a = 5; let b = a; let c = a + b + 5; c;", 15),
+        ]
+        for t in tests:
+            evaluated = self.check_eval(t[0])
+            self.assertTrue(self.check_integer_object(evaluated, t[1]))
 
 if __name__ == '__main__':
     unittest.main()

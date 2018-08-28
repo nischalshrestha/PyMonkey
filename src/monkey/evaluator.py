@@ -66,37 +66,44 @@ Evaluator stuff
 """
 
 # takes in ast.Node
-def Eval(node):
-    if type(node) is ast.Program:
-        return eval_program(node)
-    elif type(node) is ast.ExpressionStatement:
-        return Eval(node.expression)
-    elif type(node) is ast.IntegerLiteral:
+def Eval(node, env):
+    if isinstance(node, ast.Program):
+        return eval_program(node, env)
+    elif isinstance(node, ast.ExpressionStatement):
+        return Eval(node.expression, env)
+    elif isinstance(node, ast.IntegerLiteral):
         return Integer(node.value)
-    elif type(node) is ast.Boolean:
+    elif isinstance(node, ast.Boolean):
         return native_boolean_object(node.value)
-    elif type(node) is ast.PrefixExpression:
-        right = Eval(node.right)
+    elif isinstance(node, ast.PrefixExpression):
+        right = Eval(node.right, env)
         if is_error(right):
             return right
         return eval_prefix_expression(node.operator, right)
-    elif type(node) is ast.InfixExpression:
-        left = Eval(node.left)
+    elif isinstance(node, ast.InfixExpression):
+        left = Eval(node.left, env)
         if is_error(left):
             return left
-        right = Eval(node.right)
+        right = Eval(node.right, env)
         if is_error(right):
             return right
         return eval_infix_expression(node.operator, left, right)
-    elif type(node) is ast.BlockStatement:
-        return eval_block_statement(node)
-    elif type(node) is ast.IfExpression:
-        return eval_if_expression(node)
-    elif type(node) is ast.ReturnStatement:
-        val = Eval(node.return_value)
+    elif isinstance(node, ast.BlockStatement):
+        return eval_block_statement(node, env)
+    elif isinstance(node, ast.IfExpression):
+        return eval_if_expression(node, env)
+    elif isinstance(node, ast.ReturnStatement):
+        val = Eval(node.return_value, env)
         if is_error(val):
             return val
         return ReturnValue(val)
+    elif isinstance(node, ast.LetStatement):
+        val = Eval(node.value, env)
+        if is_error(val):
+            return val
+        env.set_name(node.name.value, val)
+    elif isinstance(node, ast.Identifier):
+        return eval_identifier(node, env)
     return None
 
 def is_error(obj):
@@ -104,20 +111,20 @@ def is_error(obj):
         return obj.object_type() == ERROR_OBJ
     return False
 
-def eval_program(program):
+def eval_program(program, env):
     result = Object()
     for s in program.statements:
-        result = Eval(s)
-        if type(result) is ReturnValue:
+        result = Eval(s, env)
+        if isinstance(result, ReturnValue):
             return result.value
-        if type(result) is Error:
+        if isinstance(result, Error):
             return result
     return result
 
-def eval_block_statement(block):
+def eval_block_statement(block, env):
     result = Object()
     for statement in block.statements:
-        result = Eval(statement)
+        result = Eval(statement, env)
         rt = result.object_type()
         if rt == RETURN_VALUE_OBJ or rt == ERROR_OBJ:
             return result
@@ -177,12 +184,12 @@ def eval_integer_infix_expression(operator, left, right):
         return native_boolean_object(left_val != right_val)
     return new_error(f"unknown operator: {left} {operator} {right.object_type()}")
 
-def eval_if_expression(ie):
-    condition = Eval(ie.condition)
+def eval_if_expression(ie, env):
+    condition = Eval(ie.condition, env)
     if is_truthy(condition):
-        return Eval(ie.consequence)
+        return Eval(ie.consequence, env)
     elif ie.alternative != None:
-        return Eval(ie.alternative)
+        return Eval(ie.alternative, env)
     return NULL
 
 def is_truthy(obj):
@@ -205,3 +212,28 @@ def new_error(string):
 """
 Environment stuff
 """
+
+def new_environment():
+    return Environment({})
+
+class Environment:
+    store = {} # str
+
+    def __init__(self, store):
+        self.store = store
+    
+    def get(self, name):
+        if name in self.store:
+            return self.store[name]
+        return None
+    
+    def set_name(self, name, value):
+        self.store[name] = value
+        return value
+
+def eval_identifier(node, env):
+    val = env.get(node.value)
+    if val == None:
+        return new_error("identifier not found: "+node.value)
+    return val
+

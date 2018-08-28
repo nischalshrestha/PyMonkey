@@ -19,6 +19,8 @@ MONKEY_FACE = '''
 '''
 
 def start():
+    # need one instance since we are persisting values
+    env = evaluator.new_environment()
     while True:
         line = input(prompt)
         if line == 'exit()':
@@ -30,7 +32,7 @@ def start():
         if len(p.errors) != 0:
             print_parse_errors(p.errors)
         else:
-            evaluated = evaluator.Eval(program)
+            evaluated = evaluator.Eval(program, env)
             if evaluated != None:
                 print(evaluated.inspect(), '\n')
 
