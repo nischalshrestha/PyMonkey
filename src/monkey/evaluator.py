@@ -9,6 +9,7 @@ INTEGER_OBJ = 'INTEGER'
 BOOLEAN_OBJ = 'BOOLEAN'
 RETURN_VALUE_OBJ = 'RETURN_VALUE'
 ERROR_OBJ = 'ERROR'
+FUNCTION_OBJ = 'FUNCTION'
 
 # object "interface"
 class Object:
@@ -56,6 +57,32 @@ class Error(Object):
         return ERROR_OBJ
     def inspect(self):
         return 'ERROR: '+ self.message
+
+class Function(Object):
+    parameters = [] # Identifier
+    body = None # BlockStatement
+    env = None # Environment
+    
+    def __init__(self, parameters=None, body=None, env=None):
+        if parameters == None:
+            parameters = []
+        self.parameters = parameters
+        self.body = body
+        self.env = env
+
+    def object_type(self):
+        return FUNCTION_OBJ
+
+    def inspect(self):
+        params = []
+        for p in self.parameters:
+            params.append(p.string())
+        out = ' fn('
+        out = out + ','.join(params)
+        out = out + ') {\n'
+        out = out + self.body.string()
+        out = out + '\n}'
+        return out
 
 NULL = Null()
 TRUE  = Boolean(True) 
