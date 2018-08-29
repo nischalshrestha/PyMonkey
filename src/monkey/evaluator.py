@@ -62,13 +62,13 @@ class Function(Object):
     parameters = [] # Identifier
     body = None # BlockStatement
     env = None # Environment
-    
-    def __init__(self, parameters=None, body=None, env=None):
+
+    def __init__(self, parameters=None, env=None, body=None):
         if parameters == None:
             parameters = []
         self.parameters = parameters
-        self.body = body
         self.env = env
+        self.body = body
 
     def object_type(self):
         return FUNCTION_OBJ
@@ -77,7 +77,7 @@ class Function(Object):
         params = []
         for p in self.parameters:
             params.append(p.string())
-        out = ' fn('
+        out = 'fn('
         out = out + ','.join(params)
         out = out + ') {\n'
         out = out + self.body.string()
@@ -131,6 +131,18 @@ def Eval(node, env):
         env.set_name(node.name.value, val)
     elif isinstance(node, ast.Identifier):
         return eval_identifier(node, env)
+    elif isinstance(node, ast.FunctionLiteral):
+        params = node.parameters
+        body = node.body
+        return Function(params, env, body)
+    elif isinstance(node, ast.CallExpression):
+        function = Eval(node.function, env)
+        if is_error(function):
+            return function
+        args = eval_expressions(node.arguments, env)
+        if len(args) == 1 and is_error(args[0]):
+            return args[0]
+        return apply_function(function, args)
     return None
 
 def is_error(obj):
@@ -148,13 +160,42 @@ def eval_program(program, env):
             return result
     return result
 
+def eval_expressions(exps, env):
+    result = []
+    for e in exps:
+        evaluated = Eval(e, env)
+        if is_error(evaluated):
+            return [evaluated]
+        result.append(evaluated)
+    return result
+
+def apply_function(fn, args):
+    if not isinstance(fn, Function):
+        return new_error(f"not a function: {fn.object_type()}")
+    extended_env = extend_function_env(fn, args)
+    evaluated = Eval(fn.body, extended_env)
+    return unwrapped_return_value(evaluated)
+
+def extend_function_env(fn, args):
+    env = new_enclosed_environment(fn.env)
+    # set all params for this enclosed env
+    for i, param in enumerate(fn.parameters):
+        env.set_name(param.value, args[i])
+    return env
+
+def unwrapped_return_value(obj):
+    if isinstance(obj, ReturnValue):
+        return obj.value
+    return obj
+
 def eval_block_statement(block, env):
     result = Object()
     for statement in block.statements:
         result = Eval(statement, env)
-        rt = result.object_type()
-        if rt == RETURN_VALUE_OBJ or rt == ERROR_OBJ:
-            return result
+        if result != None:
+            rt = result.object_type()
+            if rt == RETURN_VALUE_OBJ or rt == ERROR_OBJ:
+                return result
     return result
 
 def eval_prefix_expression(operator, right):
@@ -241,22 +282,32 @@ Environment stuff
 """
 
 def new_environment():
-    return Environment({})
+    return Environment({}, None)
 
 class Environment:
+    outer = None # pointer to enclosing Environment
     store = {} # str
 
-    def __init__(self, store):
+    def __init__(self, store, outer):
         self.store = store
+        self.outer = outer
     
     def get(self, name):
+        obj = None
         if name in self.store:
-            return self.store[name]
-        return None
+            obj = self.store[name]
+        elif self.outer != None:
+            obj = self.outer.get(name)
+        return obj
     
     def set_name(self, name, value):
         self.store[name] = value
         return value
+
+def new_enclosed_environment(outer):
+    env = new_environment()
+    env.outer = outer
+    return env
 
 def eval_identifier(node, env):
     val = env.get(node.value)

@@ -7,6 +7,7 @@ from monkey import ast
 from monkey import parser
 from monkey import evaluator as e
 
+# TODO use isinstance() instead of type()
 class EvaluatorTest(unittest.TestCase):
 
     def test_eval_integer_expression(self):
@@ -127,6 +128,33 @@ class EvaluatorTest(unittest.TestCase):
             ("return 2 * 5; 9;", 10),
             ("9; return 2 * 5; 9;", 10),
             ("if (10 > 1) { if (10 > 1) { return 10; } return 1; }", 10),
+            (
+                '''
+                if (10 > 1) {
+                    if (10 > 1) {
+                        return 10;
+                    }
+                    return 1;
+                }
+                ''', 10,
+            ),
+		    (
+                '''
+                let f = fn(x) {
+                    return x;
+                    x + 10;
+                };
+                f(10);''', 10
+            ),
+		    (
+                '''
+                let f = fn(x) {
+                    let result = x + 10;
+                    return result;
+                    return 10;
+                };
+                f(10);''', 20
+            )
         ]
         for t in tests:
             evaluated = self.check_eval(t[0])
@@ -146,10 +174,10 @@ class EvaluatorTest(unittest.TestCase):
         for t in tests:
             evaluated = self.check_eval(t[0])
             if not type(evaluated) is e.Error:
-                print("no error object returned. got={}({})".format(type(evaluated), evaluated))
+                print(f"no error object returned. got={type(evaluated)}({evaluated})")
                 continue
             self.assertEqual(evaluated.message, t[1], 
-                msg="wrong error message. expected={}, got={}".format(t[1], evaluated.message))
+                msg=f"wrong error message. expected={t[1]}, got={evaluated.message}")
 
     def test_let_statements(self):
         tests = [
@@ -161,6 +189,45 @@ class EvaluatorTest(unittest.TestCase):
         for t in tests:
             evaluated = self.check_eval(t[0])
             self.assertTrue(self.check_integer_object(evaluated, t[1]))
-
+    
+    def test_function_object(self):
+        source = "fn(x) { x + 2; };"
+        fn = self.check_eval(source)
+        self.assertTrue(isinstance(fn, e.Function), 
+            msg=f"object is not Function. got={type(fn)} ({fn})")
+        self.assertEqual(len(fn.parameters), 1,
+            msg=f"function has wrong parameters. Parameters={fn.parameters}")
+        self.assertEqual(fn.parameters[0].string(), "x",
+            msg=f"parameter is not 'x'. got={fn.parameters[0].string()}")
+        expected_body = "(x + 2)"
+        self.assertEqual(fn.body.string(), expected_body,
+            msg=f"parameter is not {expected_body}. got={fn.body.string()}")
+    
+    def test_function_application(self):
+        tests = [
+            ("let identity = fn(x) { x; }; identity(5);", 5),         
+            ("let identity = fn(x) { return x; }; identity(5);", 5),
+            ("let double = fn(x) { x * 2; }; double(5);", 10),    
+            ("let add = fn(x, y) { x + y; }; add(5, 5);", 10),
+            ("let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20),
+            ("fn(x) { x; }(5)", 5),
+        ]
+        for t in tests:
+            evaluated = self.check_eval(t[0])
+            self.assertTrue(self.check_integer_object(evaluated, t[1]))
+    
+    def test_closures(self):
+        source = '''
+            let newAdder = fn(x) { 
+                fn(y) { 
+                    x + y 
+                }; 
+            }; 
+            let addTwo = newAdder(2); 
+            addTwo(2);
+        '''
+        evaluated = self.check_eval(source)
+        self.assertTrue(self.check_integer_object(evaluated, 4))
+        
 if __name__ == '__main__':
     unittest.main()
