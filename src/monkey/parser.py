@@ -116,7 +116,6 @@ class Parser:
         left_exp = prefix()
         while not self.peek_token_is(token.SEMICOLON) and precedence < self.peek_precendence():
             if self.peek_token.Type not in self.infix_parse_fns:
-                print(self.peek_token.Type)
                 # self.tracer.untrace(begin)
                 return left_exp
             infix = self.infix_parse_fns[self.peek_token.Type]
@@ -149,6 +148,11 @@ class Parser:
             self.errors.append(msg)
             return None
     
+    def parse_string_literal(self):
+        # begin = self.tracer.trace('parse_string_literal')
+        # self.tracer.untrace(begin)
+        return ast.StringLiteral(self.cur_token, self.cur_token.Literal)
+        
     def parse_prefix_expression(self):
         # begin = self.tracer.trace('parse_prefix_expression')
         expression = ast.PrefixExpression(self.cur_token, self.cur_token.Literal)
@@ -278,6 +282,7 @@ def new(lexer):
     p.prefix_parse_fns = {}
     p.register_prefix(token.IDENT, p.parse_identifer)
     p.register_prefix(token.INT, p.parse_integer_literal)
+    p.register_prefix(token.STRING, p.parse_string_literal)
     p.register_prefix(token.BANG, p.parse_prefix_expression)
     p.register_prefix(token.MINUS, p.parse_prefix_expression)
     p.register_prefix(token.TRUE, p.parse_boolean)

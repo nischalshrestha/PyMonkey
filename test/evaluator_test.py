@@ -169,7 +169,8 @@ class EvaluatorTest(unittest.TestCase):
             ("5; true + false; 5;", "unknown operator: BOOLEAN + BOOLEAN"),
             ("if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"),
             ("if (10 > 1) { if (10 > 1) { return true + false; } return 1; }", "unknown operator: BOOLEAN + BOOLEAN"),
-            ("foobar", "identifier not found: foobar")
+            ("foobar", "identifier not found: foobar"),
+            ("\"Hello\" - \"World!\"", "unknown operator: STRING - STRING"),
         ]
         for t in tests:
             evaluated = self.check_eval(t[0])
@@ -228,6 +229,22 @@ class EvaluatorTest(unittest.TestCase):
         '''
         evaluated = self.check_eval(source)
         self.assertTrue(self.check_integer_object(evaluated, 4))
+    
+    def test_string_literal(self):
+        source = '\"Hello World!\";'
+        evaluated = self.check_eval(source)
+        self.assertTrue(isinstance(evaluated, e.String),
+            msg=f"object is not String. got={type(evaluated)}")
+        self.assertEqual(evaluated.value, "Hello World!", 
+            msg=f"String has wrong value. got={evaluated.value}")
+    
+    def test_string_concatenation(self):
+        source = '"Hello" + " " + "World!";'
+        evaluated = self.check_eval(source)
+        self.assertTrue(isinstance(evaluated, e.String),
+            msg=f"object is not String. got={type(evaluated)} ({evaluated})")
+        self.assertEqual(evaluated.value, "Hello World!", 
+            msg=f"String has wrong value. got={evaluated.value}")
         
 if __name__ == '__main__':
     unittest.main()

@@ -6,6 +6,7 @@ from monkey import lexer
 from monkey import ast
 from monkey import parser
 
+# TODO use isinstance() instead of type()
 class ParserTest(unittest.TestCase):
 
     def test_let_statements(self):
@@ -132,6 +133,19 @@ class ParserTest(unittest.TestCase):
             print('exp.token_literal is not {}. got={}'.format(value, exp.token_literal()))
             return False
         return True
+    
+    def test_string_literal_expression(self):
+        source = '\"hello world\";'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        stmt = program.statements[0]
+        literal = stmt.expression
+        self.assertEqual(type(literal), ast.StringLiteral,
+            msg='exp not ast.StringLiteral. got={}'.format(type(literal)))
+        self.assertEqual(literal.value, "hello world",
+            msg='ident.value not {}. got={}'.format('hello world', literal.value))
     
     def check_identifier(self, exp, value):
         if not type(exp) is ast.Identifier:

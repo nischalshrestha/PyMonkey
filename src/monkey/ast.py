@@ -121,6 +121,20 @@ class IntegerLiteral(Expression):
     def string(self):
         return str(self.value)
 
+class StringLiteral(Expression):
+    token = None # Token
+    value = "" # str
+
+    def __init__(self, token, value=""):
+        self.token = token
+        self.value = value
+
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        return self.token.Literal
+
 class PrefixExpression(Expression):
     token = None # Token
     operator = ""

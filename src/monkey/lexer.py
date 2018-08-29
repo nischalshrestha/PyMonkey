@@ -56,6 +56,9 @@ class Lexer:
             tok = new_token(token.LPAREN, ch)
         elif ch == ')':
             tok = new_token(token.RPAREN, ch)
+        elif ch == '"':
+            literal = self.read_string()
+            tok = new_token(token.STRING, literal)
         elif ch == 0:
             tok = new_token(token.EOF, "")
         else:
@@ -82,6 +85,14 @@ class Lexer:
         position = self.position
         while self.ch != 0 and is_digit(self.ch):
             self.read_char()
+        return self.source[position:self.position]
+    
+    def read_string(self):
+        position = self.position + 1
+        while True:
+            self.read_char()
+            if self.ch == '"' or self.ch == 0:
+                break
         return self.source[position:self.position]
     
     def skip_whitespace(self):

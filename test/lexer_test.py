@@ -26,6 +26,8 @@ class LexerTest(unittest.TestCase):
 
                     10 == 10;
                     10 != 9;
+                    "foobar" 
+                    "foo bar"
                     '''
         self.lexer = lexer.new(self.source)
     
@@ -104,7 +106,9 @@ class LexerTest(unittest.TestCase):
             (token.NOT_EQ, "!="),
             (token.INT, "9"),
             (token.SEMICOLON, ";"),
-            (token.EOF, "")
+            (token.STRING, "foobar"),
+            (token.STRING, "foo bar"),
+            (token.EOF, ""),
         ]
         for t in tests:
             tok = self.lexer.next_token()

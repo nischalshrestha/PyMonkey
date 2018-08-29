@@ -7,6 +7,7 @@ Object stuff
 NULL_OBJ = 'NULL'
 INTEGER_OBJ = 'INTEGER'
 BOOLEAN_OBJ = 'BOOLEAN'
+STRING_OBJ = 'STRING'
 RETURN_VALUE_OBJ = 'RETURN_VALUE'
 ERROR_OBJ = 'ERROR'
 FUNCTION_OBJ = 'FUNCTION'
@@ -39,6 +40,15 @@ class Boolean(Object):
         return BOOLEAN_OBJ
     def inspect(self):
         return str(self.value)
+
+class String(Object):
+    value = ""
+    def __init__(self, value=""):
+        self.value = value
+    def object_type(self):
+        return STRING_OBJ
+    def inspect(self):
+        return self.value
 
 class ReturnValue(Object):
     value = None # Object
@@ -100,6 +110,8 @@ def Eval(node, env):
         return Eval(node.expression, env)
     elif isinstance(node, ast.IntegerLiteral):
         return Integer(node.value)
+    elif isinstance(node, ast.StringLiteral):
+        return String(node.value)
     elif isinstance(node, ast.Boolean):
         return native_boolean_object(node.value)
     elif isinstance(node, ast.PrefixExpression):
@@ -227,6 +239,8 @@ def eval_infix_expression(operator, left, right):
         return native_boolean_object(left == right)
     elif operator == "!=":
         return native_boolean_object(left != right)
+    elif left.object_type() == STRING_OBJ and right.object_type() == STRING_OBJ:
+        return eval_string_infix_expression(operator, left, right)
     elif left.object_type() != right.object_type():
         return new_error(f"type mismatch: {left.object_type()} {operator} {right.object_type()}")
     return new_error(f"unknown operator: {left.object_type()} {operator} {right.object_type()}")
@@ -250,8 +264,15 @@ def eval_integer_infix_expression(operator, left, right):
         return native_boolean_object(left_val == right_val)
     elif operator == "!=":
         return native_boolean_object(left_val != right_val)
-    return new_error(f"unknown operator: {left} {operator} {right.object_type()}")
+    return new_error(f"unknown operator: {left.object_type()} {operator} {right.object_type()}")
 
+def eval_string_infix_expression(operator, left, right):
+    if operator != "+":
+        return new_error(f"unknown operator: {left.object_type()} {operator} {right.object_type()}")
+    left_val = left.value
+    right_val = right.value
+    return String(left_val + right_val)
+    
 def eval_if_expression(ie, env):
     condition = Eval(ie.condition, env)
     if is_truthy(condition):
