@@ -245,6 +245,25 @@ class EvaluatorTest(unittest.TestCase):
             msg=f"object is not String. got={type(evaluated)} ({evaluated})")
         self.assertEqual(evaluated.value, "Hello World!", 
             msg=f"String has wrong value. got={evaluated.value}")
-        
+    
+    def test_builtin_functions(self):
+        tests = [
+            ('len("")', 0),     
+            ('len("four")', 4), 
+            ('len("hello world")', 11),
+            ('len(1)', "argument to `len` not supported, got INTEGER"),
+            ('len("one", "two")', "wrong number of arguments. got=2, want=1")
+        ]
+        for t in tests:
+            evaluated = self.check_eval(t[0])
+            if isinstance(t[1], int):
+                self.assertTrue(self.check_integer_object(evaluated, t[1]))
+            elif isinstance(t[1], str):
+                if not isinstance(evaluated, e.Error):
+                    print(f"{t[0]} object is not Error. got={type(evaluated)} ({evaluated.value})")
+                    continue
+                self.assertEqual(evaluated.message, t[1],
+                    msg=f"wrong error message. expected={t[1]}, got={evaluated.message}")
+
 if __name__ == '__main__':
     unittest.main()

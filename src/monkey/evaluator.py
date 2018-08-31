@@ -1,106 +1,7 @@
 from monkey import ast
-
-"""
-Object stuff
-"""
-
-NULL_OBJ = 'NULL'
-INTEGER_OBJ = 'INTEGER'
-BOOLEAN_OBJ = 'BOOLEAN'
-STRING_OBJ = 'STRING'
-RETURN_VALUE_OBJ = 'RETURN_VALUE'
-ERROR_OBJ = 'ERROR'
-FUNCTION_OBJ = 'FUNCTION'
-
-# object "interface"
-class Object:
-    def object_type(self): pass # ObjectType (str)
-    def inspect(self): pass # str
-    
-class Null(Object):
-    def object_type(self):
-        return NULL_OBJ
-    def inspect(self):
-        return "null"
-
-class Integer(Object):
-    value = 0
-    def __init__(self, value=0):
-        self.value = value
-    def object_type(self):
-        return INTEGER_OBJ
-    def inspect(self):
-        return str(self.value)
-
-class Boolean(Object):
-    value = False
-    def __init__(self, value=False):
-        self.value = value
-    def object_type(self):
-        return BOOLEAN_OBJ
-    def inspect(self):
-        return str(self.value)
-
-class String(Object):
-    value = ""
-    def __init__(self, value=""):
-        self.value = value
-    def object_type(self):
-        return STRING_OBJ
-    def inspect(self):
-        return self.value
-
-class ReturnValue(Object):
-    value = None # Object
-    def __init__(self, value=None):
-        self.value = value
-    def object_type(self):
-        return RETURN_VALUE_OBJ
-    def inspect(self):
-        return self.value.inspect()
-
-class Error(Object):
-    message = None # Object
-    def __init__(self, message=None):
-        self.message = message
-    def object_type(self):
-        return ERROR_OBJ
-    def inspect(self):
-        return 'ERROR: '+ self.message
-
-class Function(Object):
-    parameters = [] # Identifier
-    body = None # BlockStatement
-    env = None # Environment
-
-    def __init__(self, parameters=None, env=None, body=None):
-        if parameters == None:
-            parameters = []
-        self.parameters = parameters
-        self.env = env
-        self.body = body
-
-    def object_type(self):
-        return FUNCTION_OBJ
-
-    def inspect(self):
-        params = []
-        for p in self.parameters:
-            params.append(p.string())
-        out = 'fn('
-        out = out + ','.join(params)
-        out = out + ') {\n'
-        out = out + self.body.string()
-        out = out + '\n}'
-        return out
-
-NULL = Null()
-TRUE  = Boolean(True) 
-FALSE = Boolean(False)
-
-"""
-Evaluator stuff
-"""
+from monkey.object import *
+from monkey.environment import *
+from monkey.builtins import *
 
 # takes in ast.Node
 def Eval(node, env):
@@ -182,11 +83,13 @@ def eval_expressions(exps, env):
     return result
 
 def apply_function(fn, args):
-    if not isinstance(fn, Function):
-        return new_error(f"not a function: {fn.object_type()}")
-    extended_env = extend_function_env(fn, args)
-    evaluated = Eval(fn.body, extended_env)
-    return unwrapped_return_value(evaluated)
+    if isinstance(fn, Function):
+        extended_env = extend_function_env(fn, args)
+        evaluated = Eval(fn.body, extended_env)
+        return unwrapped_return_value(evaluated)
+    elif isinstance(fn, Builtin):
+        return fn.fn(args)
+    return new_error(f"not a function: {fn.object_type()}")
 
 def extend_function_env(fn, args):
     env = new_enclosed_environment(fn.env)
@@ -298,33 +201,6 @@ def native_boolean_object(boolean):
 def new_error(string):
     return Error(string)
 
-"""
-Environment stuff
-"""
-
-def new_environment():
-    return Environment({}, None)
-
-class Environment:
-    outer = None # pointer to enclosing Environment
-    store = {} # str
-
-    def __init__(self, store, outer):
-        self.store = store
-        self.outer = outer
-    
-    def get(self, name):
-        obj = None
-        if name in self.store:
-            obj = self.store[name]
-        elif self.outer != None:
-            obj = self.outer.get(name)
-        return obj
-    
-    def set_name(self, name, value):
-        self.store[name] = value
-        return value
-
 def new_enclosed_environment(outer):
     env = new_environment()
     env.outer = outer
@@ -332,7 +208,8 @@ def new_enclosed_environment(outer):
 
 def eval_identifier(node, env):
     val = env.get(node.value)
-    if val == None:
-        return new_error("identifier not found: "+node.value)
-    return val
-
+    if val != None:
+        return val
+    elif node.value in builtins:
+        return builtins[node.value]
+    return new_error("identifier not found: "+node.value)
