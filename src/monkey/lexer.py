@@ -56,6 +56,10 @@ class Lexer:
             tok = new_token(token.LPAREN, ch)
         elif ch == ')':
             tok = new_token(token.RPAREN, ch)
+        elif ch == '[':
+            tok = new_token(token.LBRACKET, ch)
+        elif ch == ']':
+            tok = new_token(token.RBRACKET, ch)
         elif ch == '"':
             literal = self.read_string()
             tok = new_token(token.STRING, literal)

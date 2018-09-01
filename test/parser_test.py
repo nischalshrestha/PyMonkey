@@ -262,7 +262,9 @@ class ParserTest(unittest.TestCase):
             ("!(true == true)", "(!(true == true))"),
             ("a + add(b * c) + d", "((a + add((b * c))) + d)"), 
             ("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"), 
-            ("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))")
+            ("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"),
+            ("a * [1, 2, 3, 4][b * c] * d", "((a * ([1, 2, 3, 4][(b * c)])) * d)"), 
+            ("add(a * b[2], b[1], 2 * [1, 2][1])", "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"),
         ]
         for t in tests:
             l = lexer.new(t[0])
@@ -452,6 +454,37 @@ class ParserTest(unittest.TestCase):
             for i, arg in enumerate(t[2]):
                 if exp.arguments[i].string() != arg:
                     print("argument {} wrong. want={}, got={}".format(i, arg, exp.arguments[i].string()))
+    
+    def test_parsing_array_literals(self):
+        source = '[1, 2 * 2, 3 + 3];'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        stmt = program.statements[0]
+        array = stmt.expression
+        self.assertTrue(isinstance(array, ast.ArrayLiteral), 
+            msg=f'exp is not ast.ArrayLiteral. got={type(array)}')
+        self.assertEqual(len(array.elements), 3,
+            msg=f'len(array.elements was not 3. got={len(array.elements)}')
+        self.check_literal_expression(array.elements[0], 1)
+        self.check_infix_expression(array.elements[1], 2, '*', 2)
+        self.check_infix_expression(array.elements[2], 3, '+', 3)
+
+    def test_parsing_index_expressions(self):
+        source = 'myArray[1 + 1];'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        stmt = program.statements[0]
+        index_expr = stmt.expression
+        self.assertTrue(isinstance(index_expr, ast.IndexExpression), 
+            msg=f'exp is not ast.IndexExpression. got={type(index_expr)}')
+        if not self.check_identifier(index_expr.left, "myArray"):
+            return
+        if not self.check_infix_expression(index_expr.index, 1, "+", 1):
+            return
 
     def check_parse_errors(self, p):
         errors = p.errors

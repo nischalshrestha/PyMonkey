@@ -15,6 +15,11 @@ def Eval(node, env):
         return String(node.value)
     elif isinstance(node, ast.Boolean):
         return native_boolean_object(node.value)
+    elif isinstance(node, ast.ArrayLiteral):
+        elements = eval_expressions(node.elements, env)
+        if len(elements) == 1 and is_error(elements[0]):
+            return elements[0]
+        return Array(elements)
     elif isinstance(node, ast.PrefixExpression):
         right = Eval(node.right, env)
         if is_error(right):

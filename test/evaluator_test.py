@@ -246,6 +246,17 @@ class EvaluatorTest(unittest.TestCase):
         self.assertEqual(evaluated.value, "Hello World!", 
             msg=f"String has wrong value. got={evaluated.value}")
     
+    def test_array_literals(self):
+        source = '[1, 2 * 2, 3 + 3]'
+        evaluated = self.check_eval(source)
+        self.assertTrue(isinstance(evaluated, e.Array),
+            msg=f"object is not Array. got={type(evaluated)} ({evaluated})")
+        self.assertEqual(len(evaluated.elements), 3, 
+            msg=f"array has wrong num of elements. got={len(evaluated.elements)}")
+        self.check_integer_object(evaluated.elements[0], 1)
+        self.check_integer_object(evaluated.elements[1], 4)
+        self.check_integer_object(evaluated.elements[2], 6)
+    
     def test_builtin_functions(self):
         tests = [
             ('len("")', 0),     

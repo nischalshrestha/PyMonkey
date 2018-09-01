@@ -28,6 +28,7 @@ class LexerTest(unittest.TestCase):
                     10 != 9;
                     "foobar" 
                     "foo bar"
+                    [1, 2];
                     '''
         self.lexer = lexer.new(self.source)
     
@@ -108,6 +109,12 @@ class LexerTest(unittest.TestCase):
             (token.SEMICOLON, ";"),
             (token.STRING, "foobar"),
             (token.STRING, "foo bar"),
+            (token.LBRACKET, "["),
+            (token.INT, "1"),
+            (token.COMMA, ","),
+            (token.INT, "2"),
+            (token.RBRACKET, "]"),
+            (token.SEMICOLON, ";"),
             (token.EOF, ""),
         ]
         for t in tests:

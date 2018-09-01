@@ -225,30 +225,6 @@ class BlockStatement(Statement):
             out = out + s.string()
         return out
 
-class FunctionLiteral(Expression):
-    token = None
-    parameters = [] # Identifier
-    body = None # BodyStatement
-
-    def __init__(self, token, parameters=None, body=None):
-        self.token = token
-        if parameters == None:
-            parameters = []
-        self.parameters = parameters
-        self.body = body
-
-    def token_literal(self):
-        return self.token.Literal
-    
-    def string(self):
-        params  = []
-        for p in self.parameters:
-            params.append(p.string())
-        out = "" + self.token.Literal
-        out = out + "(" + ", ".join(params) + ")"
-        out = out + self.body.string()
-        return out
-
 class CallExpression(Expression):
 
     token = None
@@ -273,7 +249,7 @@ class CallExpression(Expression):
         out = out + "(" + ", ".join(args) + ")"
         return out
 
-class FunctionLiteral:
+class FunctionLiteral(Expression):
     token = None # fn
     parameters = [] # Identifier
     body = None # BlockStatement
@@ -294,4 +270,41 @@ class FunctionLiteral:
             args.append(a.string())
         out = "" + self.function.string()
         out = out + "(" + ", ".join(args) + ")"
+        return out
+
+class ArrayLiteral(Expression):
+    token = None
+    elements = [] # Expression
+
+    def __init__(self, token, elements=None):
+        self.token = token
+        if elements == None:
+            elements = []
+        self.elements = elements
+    
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        elements  = []
+        for e in self.elements:
+            elements.append(e.string())
+        out = "[" + ", ".join(elements) + "]"
+        return out
+
+class IndexExpression(Expression):
+    token = None
+    left = None # Expression
+    index = None # Expression
+
+    def __init__(self, token, left=None, index=None):
+        self.token = token
+        self.left = left
+        self.index = index
+    
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        out = "(" + self.left.string() + "[" +  self.index.string() + "])"
         return out

@@ -13,6 +13,7 @@ class Precedence(Enum):
     PRODUCT = auto()     
     PREFIX = auto()
     CALL = auto()
+    INDEX = auto()
 
 precedences = {
     token.EQ: Precedence.EQUALS.value,
@@ -23,7 +24,8 @@ precedences = {
     token.MINUS: Precedence.SUM.value,
     token.SLASH: Precedence.PRODUCT.value,
     token.ASTERISK: Precedence.PRODUCT.value,
-    token.LPAREN: Precedence.CALL.value
+    token.LPAREN: Precedence.CALL.value,
+    token.LBRACKET: Precedence.INDEX.value
 }
 
 # Uses Pratt Parsing
@@ -235,23 +237,36 @@ class Parser:
 
     def parse_call_expression(self, function):
         exp = ast.CallExpression(self.cur_token, function)
-        exp.arguments = self.parse_call_arguments()
+        exp.arguments = self.parse_expression_list(token.RPAREN)
         return exp
+    
+    def parse_array_literal(self):
+        array = ast.ArrayLiteral(self.cur_token)
+        array.elements = self.parse_expression_list(token.RBRACKET)
+        return array
 
-    def parse_call_arguments(self):
-        args = []
-        if self.peek_token_is(token.RPAREN):
+    def parse_expression_list(self, end):
+        exprs = []
+        if self.peek_token_is(end):
             self.next_token()
-            return args
+            return exprs
         self.next_token()
-        args.append(self.parse_expression(Precedence.LOWEST.value))
+        exprs.append(self.parse_expression(Precedence.LOWEST.value))
         while self.peek_token_is(token.COMMA):
             self.next_token()
             self.next_token()
-            args.append(self.parse_expression(Precedence.LOWEST.value))
-        if not self.expect_peek(token.RPAREN):
+            exprs.append(self.parse_expression(Precedence.LOWEST.value))
+        if not self.expect_peek(end):
             return None
-        return args
+        return exprs
+    
+    def parse_index_expression(self, left):
+        exp = ast.IndexExpression(self.cur_token, left)
+        self.next_token()
+        exp.index = self.parse_expression(Precedence.LOWEST.value)
+        if not self.expect_peek(token.RBRACKET):
+            return None
+        return exp
 
     def parse_boolean(self):
         return ast.Boolean(self.cur_token, self.current_token_is(token.TRUE))
@@ -290,6 +305,7 @@ def new(lexer):
     p.register_prefix(token.LPAREN, p.parse_grouped_expression)
     p.register_prefix(token.IF, p.parse_if_expression)
     p.register_prefix(token.FUNCTION, p.parse_function_literal)
+    p.register_prefix(token.LBRACKET, p.parse_array_literal)
     # infix
     p.register_infix(token.PLUS, p.parse_infix_expression) 
     p.register_infix(token.MINUS, p.parse_infix_expression) 
@@ -300,6 +316,7 @@ def new(lexer):
     p.register_infix(token.LT, p.parse_infix_expression) 
     p.register_infix(token.GT, p.parse_infix_expression)
     p.register_infix(token.LPAREN, p.parse_call_expression)
+    p.register_infix(token.LBRACKET, p.parse_index_expression)
     # this sets both cur_token and peek_token
     p.next_token()
     p.next_token()

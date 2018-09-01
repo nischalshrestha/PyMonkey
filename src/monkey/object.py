@@ -12,6 +12,7 @@ RETURN_VALUE_OBJ = 'RETURN_VALUE'
 ERROR_OBJ = 'ERROR'
 FUNCTION_OBJ = 'FUNCTION'
 BUILTIN_OBJ = 'BUILTIN'
+ARRAY_OBJ = 'ARRAY'
 
 # object "interface"
 class Object:
@@ -104,6 +105,19 @@ class Builtin(Object):
     def inspect(self):
         return 'builtin function'
 
+class Array(Object):
+    elements = [] # Object
+    def __init__(self, elements):
+        self.elements = elements
+    def object_type(self):
+        return ARRAY_OBJ
+    def inspect(self):
+        elements = []
+        for e in self.elements:
+            elements.append(e.inspect())
+        out = '[' + ','.join(elements) + "]"
+        return out
+        
 NULL = Null()
 TRUE  = Boolean(True) 
 FALSE = Boolean(False)
