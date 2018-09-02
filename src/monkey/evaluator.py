@@ -33,6 +33,14 @@ def Eval(node, env):
         if is_error(right):
             return right
         return eval_infix_expression(node.operator, left, right)
+    elif isinstance(node, ast.IndexExpression):
+        left = Eval(node.left, env)
+        if is_error(left):
+            return left
+        index = Eval(node.index, env)
+        if is_error(index):
+            return index
+        return eval_index_expression(left, index)
     elif isinstance(node, ast.BlockStatement):
         return eval_block_statement(node, env)
     elif isinstance(node, ast.IfExpression):
@@ -180,6 +188,19 @@ def eval_string_infix_expression(operator, left, right):
     left_val = left.value
     right_val = right.value
     return String(left_val + right_val)
+
+def eval_index_expression(left, index):
+    if left.object_type() == ARRAY_OBJ and index.object_type() == INTEGER_OBJ:
+        return eval_array_index_expression(left, index)
+    return new_error(f"index operator not supported: {left.object_type()}")
+
+def eval_array_index_expression(array, index):
+    array_object = array
+    idx = index.value
+    max_size = len(array_object.elements) - 1
+    if idx < 0 or idx > max_size:
+        return NULL
+    return array_object.elements[idx]
     
 def eval_if_expression(ie, env):
     condition = Eval(ie.condition, env)

@@ -6,6 +6,7 @@ from monkey import lexer
 from monkey import ast
 from monkey import parser
 from monkey import evaluator as e
+from monkey.object import *
 
 # TODO use isinstance() instead of type()
 class EvaluatorTest(unittest.TestCase):
@@ -42,8 +43,8 @@ class EvaluatorTest(unittest.TestCase):
         return e.Eval(program, env)
 
     def check_integer_object(self, obj, expected):
-        if not type(obj) is e.Integer:
-            print('object is not Integer. got={}'.format(type(obj)))
+        if not isinstance(obj, Integer):
+            print('object is not Integer. got={} {}'.format(type(obj), obj.message))
             return False
         if obj.value != expected:
             print('object has wrong value. got={}'.format(obj.value))
@@ -77,7 +78,7 @@ class EvaluatorTest(unittest.TestCase):
             self.assertTrue(self.check_boolean_object(evaluated, t[1]))
     
     def check_boolean_object(self, obj, expected):
-        if not type(obj) is e.Boolean:
+        if not type(obj) is Boolean:
             print('object is not Boolean. got={}'.format(type(obj)))
             return False
         if obj.value != expected:
@@ -116,7 +117,8 @@ class EvaluatorTest(unittest.TestCase):
                 self.assertTrue(self.check_null_object(evaluated))
     
     def check_null_object(self, obj):
-        if obj != e.NULL:
+        # Note: the reason we use `is` is bc NULL is an instance not a type
+        if not obj is NULL:
             print('object is not NULL. got={}({})'.format(type(obj), obj))
             return False
         return True
@@ -174,7 +176,7 @@ class EvaluatorTest(unittest.TestCase):
         ]
         for t in tests:
             evaluated = self.check_eval(t[0])
-            if not type(evaluated) is e.Error:
+            if not type(evaluated) is Error:
                 print(f"no error object returned. got={type(evaluated)}({evaluated})")
                 continue
             self.assertEqual(evaluated.message, t[1], 
@@ -194,7 +196,7 @@ class EvaluatorTest(unittest.TestCase):
     def test_function_object(self):
         source = "fn(x) { x + 2; };"
         fn = self.check_eval(source)
-        self.assertTrue(isinstance(fn, e.Function), 
+        self.assertTrue(isinstance(fn, Function), 
             msg=f"object is not Function. got={type(fn)} ({fn})")
         self.assertEqual(len(fn.parameters), 1,
             msg=f"function has wrong parameters. Parameters={fn.parameters}")
@@ -233,7 +235,7 @@ class EvaluatorTest(unittest.TestCase):
     def test_string_literal(self):
         source = '\"Hello World!\";'
         evaluated = self.check_eval(source)
-        self.assertTrue(isinstance(evaluated, e.String),
+        self.assertTrue(isinstance(evaluated, String),
             msg=f"object is not String. got={type(evaluated)}")
         self.assertEqual(evaluated.value, "Hello World!", 
             msg=f"String has wrong value. got={evaluated.value}")
@@ -241,7 +243,7 @@ class EvaluatorTest(unittest.TestCase):
     def test_string_concatenation(self):
         source = '"Hello" + " " + "World!";'
         evaluated = self.check_eval(source)
-        self.assertTrue(isinstance(evaluated, e.String),
+        self.assertTrue(isinstance(evaluated, String),
             msg=f"object is not String. got={type(evaluated)} ({evaluated})")
         self.assertEqual(evaluated.value, "Hello World!", 
             msg=f"String has wrong value. got={evaluated.value}")
@@ -249,13 +251,33 @@ class EvaluatorTest(unittest.TestCase):
     def test_array_literals(self):
         source = '[1, 2 * 2, 3 + 3]'
         evaluated = self.check_eval(source)
-        self.assertTrue(isinstance(evaluated, e.Array),
+        self.assertTrue(isinstance(evaluated, Array),
             msg=f"object is not Array. got={type(evaluated)} ({evaluated})")
         self.assertEqual(len(evaluated.elements), 3, 
             msg=f"array has wrong num of elements. got={len(evaluated.elements)}")
         self.check_integer_object(evaluated.elements[0], 1)
         self.check_integer_object(evaluated.elements[1], 4)
         self.check_integer_object(evaluated.elements[2], 6)
+
+    def test_array_index_expressions(self):
+        tests = [
+            ("[1, 2, 3][0]", 1),
+            ("[1, 2, 3][1]", 2),
+            ("[1, 2, 3][2]", 3),
+            ("let i = 0; [1][i]", 1),
+            ("[1, 2, 3][1 + 1]", 3),
+            ("let myArray = [1, 2, 3]; myArray[2]", 3),
+            ("let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6),
+            ("let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i];", 2),
+            ("[1, 2, 3][3]", None),
+            ("[1, 2, 3][-1]", None),
+        ]
+        for t in tests:
+            evaluated = self.check_eval(t[0])
+            if isinstance(t[1], int):
+                self.check_integer_object(evaluated, t[1])
+            else:
+                self.check_null_object(evaluated)
     
     def test_builtin_functions(self):
         tests = [
@@ -270,7 +292,7 @@ class EvaluatorTest(unittest.TestCase):
             if isinstance(t[1], int):
                 self.assertTrue(self.check_integer_object(evaluated, t[1]))
             elif isinstance(t[1], str):
-                if not isinstance(evaluated, e.Error):
+                if not isinstance(evaluated, Error):
                     print(f"{t[0]} object is not Error. got={type(evaluated)} ({evaluated.value})")
                     continue
                 self.assertEqual(evaluated.message, t[1],
