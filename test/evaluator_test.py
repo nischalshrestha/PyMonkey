@@ -117,7 +117,7 @@ class EvaluatorTest(unittest.TestCase):
                 self.assertTrue(self.check_null_object(evaluated))
     
     def check_null_object(self, obj):
-        # Note: the reason we use `is` is bc NULL is an instance not a type
+        # Note: the reason we use 'is' is bc NULL is an instance not a type
         if not obj is NULL:
             print('object is not NULL. got={}({})'.format(type(obj), obj))
             return False
@@ -285,7 +285,20 @@ class EvaluatorTest(unittest.TestCase):
             ('len("four")', 4), 
             ('len("hello world")', 11),
             ('len(1)', "argument to `len` not supported, got INTEGER"),
-            ('len("one", "two")', "wrong number of arguments. got=2, want=1")
+            ('len("one", "two")', "wrong number of arguments. got=2, want=1"),
+            ('len([1, 2, 3])', 3),
+            ('len([])', 0),
+            # ('puts("hello", "world!")', None),
+            ('first([1, 2, 3])', 1),
+            ('first([])', None),
+            ('first(1)', "argument to `first` must be ARRAY, got INTEGER"),
+            ('last([1, 2, 3])', 3),
+            ('last([])', None),
+            ('last(1)', "argument to `last` must be ARRAY, got INTEGER"),
+            ('rest([1, 2, 3])', [2, 3]),
+            ('rest([])', None),
+            ('push([], 1)', [1]),
+            ('push(1, 1)', "argument to `push` must be ARRAY, got INTEGER"),
         ]
         for t in tests:
             evaluated = self.check_eval(t[0])
@@ -297,6 +310,18 @@ class EvaluatorTest(unittest.TestCase):
                     continue
                 self.assertEqual(evaluated.message, t[1],
                     msg=f"wrong error message. expected={t[1]}, got={evaluated.message}")
+
+        # e.g. of using builtin functions: map
+        # let map = fn(arr, f) { let iter = fn(arr, accumulated) {     if (len(arr) == 0) { accumulated     } else {       iter(rest(arr), push(accumulated, f(first(arr))));     }   };   iter(arr, []); };
+        # let a = [1,2,3,4]
+        # let double = fn(x) { x * 2 }
+        # map(a, double)
+        # [2,4,6,8]
+
+        # e.g. of using builtin functions: reduce
+        # let reduce = fn(arr, initial, f) {   let iter = fn(arr, result) {     if (len(arr) == 0) { result     } else {       iter(rest(arr), f(result, first(arr)));     }   };   iter(arr, initial);};
+        # let sum = fn(arr) {   reduce(arr, 0, fn(initial, el) { initial + el }); };
+        # sum([1, 2, 3, 4, 5]);
 
 if __name__ == '__main__':
     unittest.main()
