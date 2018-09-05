@@ -8,7 +8,6 @@ from monkey import parser
 from monkey import evaluator as e
 from monkey.object import *
 
-# TODO use isinstance() instead of type()
 class EvaluatorTest(unittest.TestCase):
 
     def test_eval_integer_expression(self):
@@ -78,7 +77,7 @@ class EvaluatorTest(unittest.TestCase):
             self.assertTrue(self.check_boolean_object(evaluated, t[1]))
     
     def check_boolean_object(self, obj, expected):
-        if not type(obj) is Boolean:
+        if not isinstance(obj, Boolean):
             print('object is not Boolean. got={}'.format(type(obj)))
             return False
         if obj.value != expected:
@@ -111,7 +110,7 @@ class EvaluatorTest(unittest.TestCase):
         ]
         for t in tests:
             evaluated = self.check_eval(t[0])
-            if type(t[1]) is int:
+            if isinstance(t[1], int):
                 self.assertTrue(self.check_integer_object(evaluated, t[1]))
             else:
                 self.assertTrue(self.check_null_object(evaluated))
@@ -176,7 +175,7 @@ class EvaluatorTest(unittest.TestCase):
         ]
         for t in tests:
             evaluated = self.check_eval(t[0])
-            if not type(evaluated) is Error:
+            if not isinstance(evaluated, Error):
                 print(f"no error object returned. got={type(evaluated)}({evaluated})")
                 continue
             self.assertEqual(evaluated.message, t[1], 

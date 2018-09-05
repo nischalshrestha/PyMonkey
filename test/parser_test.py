@@ -6,7 +6,6 @@ from monkey import lexer
 from monkey import ast
 from monkey import parser
 
-# TODO use isinstance() instead of type()
 class ParserTest(unittest.TestCase):
 
     def test_let_statements(self):
@@ -42,7 +41,7 @@ class ParserTest(unittest.TestCase):
         if s.token_literal() != 'let':
             print("s.token_literal not 'let'. got={}".format(s.token_literal()))
             return False
-        if not type(s) is ast.LetStatement:
+        if not isinstance(s, ast.LetStatement):
             print("s is not a ast.LetStatement. got={}".format(type(s)))
             return False
         if s.name.value != name:
@@ -64,7 +63,7 @@ class ParserTest(unittest.TestCase):
             print('program.statements does not contain 3 statements. got={}'.format(len(program.statements)))
             return
         for i, s in enumerate(program.statements):
-            if not type(s) is ast.ReturnStatement:
+            if not isinstance(s, ast.ReturnStatement):
                 self.fail("s is not a ast.ReturnStatement. got={}".format(type(s)))
             if s.token_literal() != "return":
                 print("statement s token not 'return'. got={}".format(s.token_literal()))
@@ -80,10 +79,10 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(len(program.statements), 1, 
             msg='program does not have enough statements. got={}'.format(len(program.statements)))
         stmt = program.statements[0]
-        self.assertEqual(type(stmt), ast.ExpressionStatement,
+        self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
             msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
         ident = stmt.expression
-        self.assertEqual(type(ident), ast.Identifier,
+        self.assertTrue(isinstance(ident, ast.Identifier),
             msg='exp not ast.Identifier. got={}'.format(type(ident)))
         self.assertEqual(ident.value, 'foobar',
             msg='ident.value not {}. got={}'.format('foobar', ident.value))
@@ -99,10 +98,10 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(len(program.statements), 1, 
             msg='program does not have enough statements. got={}'.format(len(program.statements)))
         stmt = program.statements[0]
-        self.assertEqual(type(stmt), ast.ExpressionStatement,
+        self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
             msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
         literal = stmt.expression
-        self.assertEqual(type(literal), ast.IntegerLiteral,
+        self.assertTrue(isinstance(literal, ast.IntegerLiteral),
             msg='exp not ast.IntegerLiteral. got={}'.format(type(literal)))
         self.assertEqual(literal.value, 5,
             msg='ident.value not {}. got={}'.format('5', literal.value))
@@ -111,7 +110,7 @@ class ParserTest(unittest.TestCase):
 
     def check_integer_literal(self, il, value):
         integ = il
-        if not type(integ) is ast.IntegerLiteral:
+        if not isinstance(integ, ast.IntegerLiteral):
             print('il not ast.IntegerLiteral. got={}'.format(type(integ)))
             return False
         if integ.value != value:
@@ -123,7 +122,7 @@ class ParserTest(unittest.TestCase):
         return True
     
     def check_boolean_literal(self, exp, value):
-        if not type(exp) is ast.Boolean:
+        if not isinstance(exp, ast.Boolean):
             print('exp is not ast.Boolean. got={}'.format(type(exp)))
             return False
         if exp.value != value:
@@ -142,13 +141,13 @@ class ParserTest(unittest.TestCase):
         self.check_parse_errors(p)
         stmt = program.statements[0]
         literal = stmt.expression
-        self.assertEqual(type(literal), ast.StringLiteral,
+        self.assertTrue(isinstance(literal, ast.StringLiteral),
             msg='exp not ast.StringLiteral. got={}'.format(type(literal)))
         self.assertEqual(literal.value, "hello world",
             msg='ident.value not {}. got={}'.format('hello world', literal.value))
     
     def check_identifier(self, exp, value):
-        if not type(exp) is ast.Identifier:
+        if not isinstance(exp, ast.Identifier):
             print('exp is not ast.Identifier. got={}'.format(type(exp)))
             return False
         if exp.value != value:
@@ -185,10 +184,10 @@ class ParserTest(unittest.TestCase):
             self.assertEqual(len(program.statements), 1, 
                 msg='program does not have enough statements. got={}'.format(len(program.statements)))
             stmt = program.statements[0]
-            self.assertEqual(type(stmt), ast.ExpressionStatement,
+            self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
                 msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
             exp = stmt.expression
-            self.assertEqual(type(exp), ast.PrefixExpression,
+            self.assertTrue(isinstance(exp, ast.PrefixExpression),
                 msg='exp not ast.PrefixExpression. got={}'.format(type(exp)))
             self.assertEqual(exp.operator, t[1],
                 msg='exp.operator not {}. got={}'.format(t[1], exp.operator))
@@ -217,13 +216,13 @@ class ParserTest(unittest.TestCase):
             self.assertEqual(len(program.statements), 1, 
                 msg='program does not have enough statements. got={}'.format(len(program.statements)))
             stmt = program.statements[0]
-            self.assertEqual(type(stmt), ast.ExpressionStatement,
+            self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
                 msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
             if not self.check_infix_expression(stmt.expression, t[1], t[2], t[3]):
                 return
 
     def check_infix_expression(self, exp, left, operator, right):
-        if not type(exp) is ast.InfixExpression:
+        if not isinstance(exp, ast.InfixExpression):
             print('exp is not ast.InfixExpression. got={}'.format(type(exp)))
             return False
         opExp = exp
@@ -288,10 +287,10 @@ class ParserTest(unittest.TestCase):
             self.assertEqual(len(program.statements), 1, 
                 msg='program does not have enough statements. got={}'.format(len(program.statements)))
             stmt = program.statements[0]
-            self.assertEqual(type(stmt), ast.ExpressionStatement,
+            self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
                 msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
             exp = stmt.expression
-            if not type(exp) is ast.Boolean:
+            if not isinstance(exp, ast.Boolean):
                 print('exp is not ast.Boolean. got={}'.format(type(exp)))
             boolean = exp.value
             self.assertEqual(boolean, t[1],
@@ -312,17 +311,17 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(len(program.statements), 1, 
             msg='program does not have enough statements. got={}'.format(len(program.statements)))
         stmt = program.statements[0]
-        self.assertEqual(type(stmt), ast.ExpressionStatement,
+        self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
             msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
         exp = stmt.expression
-        if not type(exp) is ast.IfExpression:
+        if not isinstance(exp, ast.IfExpression):
             print('exp is not ast.IfExpression. got={}'.format(type(exp)))
         if not self.check_infix_expression(exp.condition, 'x', '<', 'y'):
             return
         self.assertEqual(len(exp.consequence.statements), 1, 
             msg='consequences does not have enough statements. got={}'.format(len(exp.consequence.statements)))
         consequence = exp.consequence.statements[0]
-        if not type(consequence) is ast.ExpressionStatement:
+        if not isinstance(consequence, ast.ExpressionStatement):
             print('statements[0] is not ast.ExpressionStatement. got={}'.format(type(consequence)))
         if not self.check_identifier(consequence.expression, 'x'):
             return
@@ -344,17 +343,17 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(len(program.statements), 1, 
             msg='program does not have enough statements. got={}'.format(len(program.statements)))
         stmt = program.statements[0]
-        self.assertEqual(type(stmt), ast.ExpressionStatement,
+        self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
             msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
         exp = stmt.expression
-        if not type(exp) is ast.IfExpression:
+        if not isinstance(exp, ast.IfExpression):
             print('exp is not ast.IfExpression. got={}'.format(type(exp)))
         if not self.check_infix_expression(exp.condition, 'x', '<', 'y'):
             return
         self.assertEqual(len(exp.consequence.statements), 1, 
             msg='consequences does not have enough statements. got={}'.format(len(exp.consequence.statements)))
         consequence = exp.consequence.statements[0]
-        if not type(consequence) is ast.ExpressionStatement:
+        if not isinstance(consequence, ast.ExpressionStatement):
             print('statements[0] is not ast.ExpressionStatement. got={}'.format(type(consequence)))
         if not self.check_identifier(consequence.expression, 'x'):
             return
@@ -362,7 +361,7 @@ class ParserTest(unittest.TestCase):
             print("exp.alternative.statements does not contain 1 statements. got={}",
                 len(exp.alternative.statements))
         alternative = exp.alternative.statements[0]
-        if not type(alternative) is ast.ExpressionStatement:
+        if not isinstance(alternative, ast.ExpressionStatement):
             print('statements[0] is not ast.ExpressionStatement. got={}'.format(type(alternative)))
         if not self.check_identifier(alternative.expression, "y"):
             return
@@ -376,10 +375,10 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(len(program.statements), 1, 
             msg='program does not have enough statements. got={}'.format(len(program.statements)))
         stmt = program.statements[0]
-        self.assertEqual(type(stmt), ast.ExpressionStatement,
+        self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
             msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
         function = stmt.expression
-        if not type(function) is ast.FunctionLiteral:
+        if not isinstance(function, ast.FunctionLiteral):
             print('function is not ast.FunctionLiteral. got={}'.format(type(function)))
         self.assertEqual(len(function.parameters), 2, 
             msg='function literal parameters wrong. want 2, got={}'.format(len(function.parameters)))
@@ -388,7 +387,7 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(len(function.body.statements), 1, 
             msg='function.body.statements does not have 1 statement, got={}'.format(len(function.body.statements)))
         body_stmt = function.body.statements[0]
-        if not type(body_stmt) is ast.ExpressionStatement:
+        if not isinstance(body_stmt, ast.ExpressionStatement):
             print('function body statement is not ast.ExpressionStatement. got={}'.format(type(body_stmt)))
         self.check_infix_expression(body_stmt.expression, 'x', '+', 'y')
     
@@ -419,10 +418,10 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(len(program.statements), 1, 
             msg='program does not have enough statements. got={}'.format(len(program.statements)))
         stmt = program.statements[0]
-        self.assertEqual(type(stmt), ast.ExpressionStatement,
+        self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
             msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
         exp = stmt.expression
-        if not type(exp) is ast.CallExpression:
+        if not isinstance(exp, ast.CallExpression):
             print('exp is not ast.CallExpression. got={}'.format(type(exp)))
         if not self.check_identifier(exp.function, "add"):
             return
@@ -445,7 +444,7 @@ class ParserTest(unittest.TestCase):
             self.check_parse_errors(p)
             stmt = program.statements[0]
             exp = stmt.expression
-            if not type(exp) is ast.CallExpression:
+            if not isinstance(exp, ast.CallExpression):
                 print('stmt.Expression is not ast.CallExpression. got={}'.format(type(exp)))
             if not self.check_identifier(exp.function, t[1]):
                 return
@@ -485,6 +484,42 @@ class ParserTest(unittest.TestCase):
             return
         if not self.check_infix_expression(index_expr.index, 1, "+", 1):
             return
+
+    # def test_parsing_hash_literal_string_keys(self):
+    #     source = '{"one": 1, "two": 2, "three": 3}'
+    #     l = lexer.new(source)
+    #     p = parser.new(l)
+    #     program = p.parse_program()
+    #     self.check_parse_errors(p)
+    #     stmt = program.statements[0]
+    #     hash_exp = stmt.expression
+    #     self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
+    #         msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
+    #     self.assertEqual(len(hash_exp.pairs), 3,
+    #         msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
+    #     expected = {
+    #         "one": 1,
+    #         "two": 2,
+    #         "three": 3
+    #     }
+    #     for key, value in hash_exp.pairs.items():
+    #         self.assertTrue(isinstance(key, ast.StringLiteral), 
+    #             msg=f'exp is not ast.StringLiteral. got={type(key)}')
+    #         expected_val = expected[key]
+    #         self.check_integer_literal(value, expected_val)
+    
+    # def test_parsing_empty_hash_literal(self):
+    #     source = '\{\}'
+    #     l = lexer.new(source)
+    #     p = parser.new(l)
+    #     program = p.parse_program()
+    #     self.check_parse_errors(p)
+    #     stmt = program.statements[0]
+    #     hash_exp = stmt.expression
+    #     self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
+    #         msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
+    #     self.assertEqual(len(hash_exp.pairs), 0,
+    #         msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
 
     def check_parse_errors(self, p):
         errors = p.errors
