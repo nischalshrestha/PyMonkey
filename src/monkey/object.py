@@ -1,4 +1,5 @@
 from monkey import ast
+from fnvhash import fnv1_64
 
 """
 Object stuff
@@ -33,6 +34,8 @@ class Integer(Object):
         return INTEGER_OBJ
     def inspect(self):
         return str(self.value)
+    def hash_key(self):
+        return HashKey(self.object_type(), self.value)
 
 class Boolean(Object):
     value = False
@@ -42,6 +45,10 @@ class Boolean(Object):
         return BOOLEAN_OBJ
     def inspect(self):
         return str(self.value)
+    def hash_key(self):
+        value = 0
+        if not self.value: value = 1
+        return HashKey(self.object_type(), value)
 
 class String(Object):
     value = ""
@@ -51,6 +58,8 @@ class String(Object):
         return STRING_OBJ
     def inspect(self):
         return self.value
+    def hash_key(self):
+        return HashKey(self.object_type(), fnv1_64(self.value.encode()))
 
 class ReturnValue(Object):
     value = None # Object
@@ -117,6 +126,14 @@ class Array(Object):
             elements.append(e.inspect())
         out = '[' + ','.join(elements) + "]"
         return out
+
+class HashKey(Object):
+    key = None
+    value = 0
+
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
 
 NULL = Null()
 TRUE  = Boolean(True) 
