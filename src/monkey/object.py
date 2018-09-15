@@ -117,7 +117,7 @@ class Array(Object):
             elements.append(e.inspect())
         out = '[' + ','.join(elements) + "]"
         return out
-        
+
 NULL = Null()
 TRUE  = Boolean(True) 
 FALSE = Boolean(False)

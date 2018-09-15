@@ -308,3 +308,21 @@ class IndexExpression(Expression):
     def string(self):
         out = "(" + self.left.string() + "[" +  self.index.string() + "])"
         return out
+
+class HashLiteral(Expression):
+    token = None # { token
+    pairs = {} # Expression
+
+    def __init__(self, token, pairs=None):
+        self.token = token
+        self.pairs = pairs
+    
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        pairs = []
+        for key, value in self.pairs.items():
+            pairs.append(key.string() + ":" + value.string())
+        out = "{" + ", ".join(pairs) + "}"
+        return out

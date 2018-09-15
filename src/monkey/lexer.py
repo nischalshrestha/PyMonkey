@@ -46,6 +46,8 @@ class Lexer:
             tok = new_token(token.GT, ch)
         elif ch == ';':
             tok = new_token(token.SEMICOLON, ch)
+        elif ch == ':':
+            tok = new_token(token.COLON, ch)
         elif ch == ',':
             tok = new_token(token.COMMA, ch)
         elif ch == '{':

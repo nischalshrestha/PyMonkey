@@ -267,6 +267,23 @@ class Parser:
         if not self.expect_peek(token.RBRACKET):
             return None
         return exp
+    
+    def parse_hash_literal(self):
+        hash_lit = ast.HashLiteral(self.cur_token)
+        hash_lit.pairs = {}
+        while not self.peek_token_is(token.RBRACE):
+            self.next_token()
+            key = self.parse_expression(Precedence.LOWEST.value)
+            if not self.expect_peek(token.COLON):
+                return None
+            self.next_token()
+            value = self.parse_expression(Precedence.LOWEST.value)
+            hash_lit.pairs[key] = value
+            if not self.peek_token_is(token.RBRACE) and not self.expect_peek(token.COMMA):
+                return None
+        if not self.expect_peek(token.RBRACE):
+            return None
+        return hash_lit
 
     def parse_boolean(self):
         return ast.Boolean(self.cur_token, self.current_token_is(token.TRUE))
@@ -306,6 +323,7 @@ def new(lexer):
     p.register_prefix(token.IF, p.parse_if_expression)
     p.register_prefix(token.FUNCTION, p.parse_function_literal)
     p.register_prefix(token.LBRACKET, p.parse_array_literal)
+    p.register_prefix(token.LBRACE, p.parse_hash_literal)
     # infix
     p.register_infix(token.PLUS, p.parse_infix_expression) 
     p.register_infix(token.MINUS, p.parse_infix_expression) 

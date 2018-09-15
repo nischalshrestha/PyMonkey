@@ -484,42 +484,112 @@ class ParserTest(unittest.TestCase):
             return
         if not self.check_infix_expression(index_expr.index, 1, "+", 1):
             return
-
-    # def test_parsing_hash_literal_string_keys(self):
-    #     source = '{"one": 1, "two": 2, "three": 3}'
-    #     l = lexer.new(source)
-    #     p = parser.new(l)
-    #     program = p.parse_program()
-    #     self.check_parse_errors(p)
-    #     stmt = program.statements[0]
-    #     hash_exp = stmt.expression
-    #     self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
-    #         msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
-    #     self.assertEqual(len(hash_exp.pairs), 3,
-    #         msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
-    #     expected = {
-    #         "one": 1,
-    #         "two": 2,
-    #         "three": 3
-    #     }
-    #     for key, value in hash_exp.pairs.items():
-    #         self.assertTrue(isinstance(key, ast.StringLiteral), 
-    #             msg=f'exp is not ast.StringLiteral. got={type(key)}')
-    #         expected_val = expected[key]
-    #         self.check_integer_literal(value, expected_val)
     
-    # def test_parsing_empty_hash_literal(self):
-    #     source = '\{\}'
-    #     l = lexer.new(source)
-    #     p = parser.new(l)
-    #     program = p.parse_program()
-    #     self.check_parse_errors(p)
-    #     stmt = program.statements[0]
-    #     hash_exp = stmt.expression
-    #     self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
-    #         msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
-    #     self.assertEqual(len(hash_exp.pairs), 0,
-    #         msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
+    def test_parsing_empty_hash_literal(self):
+        source = '{}'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        stmt = program.statements[0]
+        hash_exp = stmt.expression
+        self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
+            msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
+        self.assertEqual(len(hash_exp.pairs), 0,
+            msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
+    
+    def test_parsing_hash_literals_string_keys(self):
+        source = '{"one": 1, "two": 2, "three": 3}'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        stmt = program.statements[0]
+        hash_exp = stmt.expression
+        self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
+            msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
+        self.assertEqual(len(hash_exp.pairs), 3,
+            msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
+        expected = {
+            "one": 1,
+            "two": 2,
+            "three": 3
+        }
+        for key, value in hash_exp.pairs.items():
+            self.assertTrue(isinstance(key, ast.StringLiteral), 
+                msg=f'exp is not ast.StringLiteral. got={type(key)}')
+            expected_val = expected[key.string()]
+            self.check_integer_literal(value, expected_val)
+    
+    def test_parsing_hash_literals_boolean_keys(self):
+        source = '{true: 1, false: 2}'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        stmt = program.statements[0]
+        hash_exp = stmt.expression
+        self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
+            msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
+        self.assertEqual(len(hash_exp.pairs), 2,
+            msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
+        expected = {
+            "true":  1,
+            "false": 2,
+        }
+        for key, value in hash_exp.pairs.items():
+            self.assertTrue(isinstance(key, ast.Boolean), 
+                msg=f'exp is not ast.Boolean. got={type(key)}')
+            expected_val = expected[key.string()]
+            self.check_integer_literal(value, expected_val)
+    
+    def test_parsing_hash_literals_integer_keys(self):
+        source = '{1: 1, 2: 2, 3: 3}'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        stmt = program.statements[0]
+        hash_exp = stmt.expression
+        self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
+            msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
+        self.assertEqual(len(hash_exp.pairs), 3,
+            msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
+        expected = {
+            "1": 1,
+            "2": 2,
+            "3": 3,
+        }
+        for key, value in hash_exp.pairs.items():
+            self.assertTrue(isinstance(key, ast.IntegerLiteral), 
+                msg=f'exp is not ast.IntegerLiteral. got={type(key)}')
+            expected_val = expected[key.string()]
+            self.check_integer_literal(value, expected_val)
+
+    def test_parsing_hash_literals_with_expressions(self):
+        source = '{"one": 0 + 1, "two": 10 - 8, "three": 15/5}'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        stmt = program.statements[0]
+        hash_exp = stmt.expression
+        self.assertTrue(isinstance(hash_exp, ast.HashLiteral), 
+            msg=f'exp is not ast.HashLiteral. got={type(hash_exp)}')
+        self.assertEqual(len(hash_exp.pairs), 3,
+            msg=f'hash.pairs has wrong length. got={len(hash_exp.pairs)}')
+        tests = {
+            "one": lambda e: self.check_infix_expression(e, 0, "+", 1),
+            "two": lambda e: self.check_infix_expression(e, 10, "-", 8),
+            "three": lambda e: self.check_infix_expression(e, 15, "/", 5),
+        }
+        for key, value in hash_exp.pairs.items():
+            self.assertTrue(isinstance(key, ast.StringLiteral), 
+                msg=f'exp is not ast.StringLiteral. got={type(key)}')
+            self.assertTrue(key.string() in tests, 
+                msg=f"no test function for key {key} found")
+            test_func = tests[key.string()]
+            test_func(value)
 
     def check_parse_errors(self, p):
         errors = p.errors
