@@ -15,6 +15,8 @@ def Eval(node, env):
         return String(node.value)
     elif isinstance(node, ast.Boolean):
         return native_boolean_object(node.value)
+    elif isinstance(node, ast.HashLiteral):
+        return eval_hash_literal(node, env)
     elif isinstance(node, ast.ArrayLiteral):
         elements = eval_expressions(node.elements, env)
         if len(elements) == 1 and is_error(elements[0]):
@@ -193,6 +195,22 @@ def eval_index_expression(left, index):
     if left.object_type() == ARRAY_OBJ and index.object_type() == INTEGER_OBJ:
         return eval_array_index_expression(left, index)
     return new_error(f"index operator not supported: {left.object_type()}")
+
+def eval_hash_literal(node, env):
+    pairs = {}
+    for key_node, value_node in node.pairs.items():
+        key = Eval(key_node, env)
+        if is_error(key):
+            return key
+        if not callable(getattr(key, 'hash_key', None)):
+            return new_error(f"unusable as hash key: {key.object_type()}")
+        value = Eval(value_node, env)
+        if is_error(value):
+            return value
+        hashed = key.hash_key()
+        pairs[hashed] = HashPair(key, value)
+    return Hash(pairs)
+
 
 def eval_array_index_expression(array, index):
     array_object = array

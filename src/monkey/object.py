@@ -1,5 +1,4 @@
 from monkey import ast
-from fnvhash import fnv1_64
 
 """
 Object stuff
@@ -14,6 +13,7 @@ ERROR_OBJ = 'ERROR'
 FUNCTION_OBJ = 'FUNCTION'
 BUILTIN_OBJ = 'BUILTIN'
 ARRAY_OBJ = 'ARRAY'
+HASH_OBJ = 'HASH'
 
 # object "interface"
 class Object:
@@ -59,7 +59,7 @@ class String(Object):
     def inspect(self):
         return self.value
     def hash_key(self):
-        return HashKey(self.object_type(), fnv1_64(self.value.encode()))
+        return HashKey(self.object_type(), hash(self.value.encode()))
 
 class ReturnValue(Object):
     value = None # Object
@@ -130,10 +130,29 @@ class Array(Object):
 class HashKey(Object):
     key = None
     value = 0
-
     def __init__(self, key, value):
         self.key = key
         self.value = value
+
+class HashPair:
+    key = None
+    value = None
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+
+class Hash(Object):
+    pairs = {} # <Hashkey, HashPair>
+    def __init__(self, pairs):
+        self.pairs = pairs
+    def object_type(self):
+        return HASH_OBJ
+    def inspect(self):
+        pairs = []
+        for key, value in self.pairs.items():
+            pairs.append(f"{key.inspect()}:  {value}")
+        out = "{" + ", ".join(pairs) + "}"
+        return out
 
 NULL = Null()
 TRUE  = Boolean(True) 

@@ -277,6 +277,42 @@ class EvaluatorTest(unittest.TestCase):
                 self.check_integer_object(evaluated, t[1])
             else:
                 self.check_null_object(evaluated)
+
+    def test_hash_literals(self):
+        source = '''
+            let two = "two";
+            {
+                "one": 10 - 9, 
+                two: 1 + 1, 
+                "thr" + "ee": 6 / 2, 
+                4: 4, 
+                true: 5,
+                false: 6
+            }
+        '''
+        evaluated = self.check_eval(source)
+        self.assertTrue(isinstance(evaluated, Hash),
+            msg=f"Eval didn't return Hash. got={type(evaluated)} ({evaluated})")
+        expected = {
+            String("one").hash_key():   1,         
+            String("two").hash_key():   2,         
+            String("three").hash_key(): 3,         
+            Integer(4).hash_key():      4,         
+            TRUE.hash_key():            5,         
+            FALSE.hash_key():           6
+        }
+        self.assertEqual(len(evaluated.pairs), len(expected),
+            msg=f'Hash has wrong num of pairs. got={len(evaluated.pairs)}')
+        for key, value in expected.items():
+            hash_key = None
+            for k, v in evaluated.pairs.items():
+                if key.key == k.key and key.value == k.value:
+                    exists = True
+                    hash_key = k
+                    break
+            self.assertTrue(exists, 
+                msg=f"no pair for given key {key} found")
+            self.check_integer_object(evaluated.pairs[hash_key].value, value)
     
     def test_builtin_functions(self):
         tests = [
