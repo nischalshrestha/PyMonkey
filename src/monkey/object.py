@@ -59,7 +59,8 @@ class String(Object):
     def inspect(self):
         return self.value
     def hash_key(self):
-        return HashKey(self.object_type(), hash(self.value.encode()))
+        # print('object type', self.value)
+        return HashKey(self.value, hash(self.value.encode()))
 
 class ReturnValue(Object):
     value = None # Object
@@ -133,6 +134,8 @@ class HashKey(Object):
     def __init__(self, key, value):
         self.key = key
         self.value = value
+    def inspect(self):
+        return self.key
 
 class HashPair:
     key = None
@@ -150,7 +153,7 @@ class Hash(Object):
     def inspect(self):
         pairs = []
         for key, value in self.pairs.items():
-            pairs.append(f"{key.inspect()}:  {value}")
+            pairs.append(f"{key.inspect()}:  {value.value.inspect()}")
         out = "{" + ", ".join(pairs) + "}"
         return out
 

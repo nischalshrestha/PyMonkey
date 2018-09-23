@@ -211,7 +211,6 @@ def eval_hash_literal(node, env):
         pairs[hashed] = HashPair(key, value)
     return Hash(pairs)
 
-
 def eval_array_index_expression(array, index):
     array_object = array
     idx = index.value
