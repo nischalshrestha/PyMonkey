@@ -194,6 +194,8 @@ def eval_string_infix_expression(operator, left, right):
 def eval_index_expression(left, index):
     if left.object_type() == ARRAY_OBJ and index.object_type() == INTEGER_OBJ:
         return eval_array_index_expression(left, index)
+    elif left.object_type() == HASH_OBJ:
+        return eval_hash_index_expression(left, index)
     return new_error(f"index operator not supported: {left.object_type()}")
 
 def eval_hash_literal(node, env):
@@ -210,6 +212,15 @@ def eval_hash_literal(node, env):
         hashed = key.hash_key()
         pairs[hashed] = HashPair(key, value)
     return Hash(pairs)
+
+def eval_hash_index_expression(hash, index):
+    hash_object = hash
+    if not callable(getattr(index, 'hash_key', None)):
+        return new_error(f"unusable as hash key: {index.object_type()}")
+    pair = NULL
+    if index.hash_key() in hash_object.pairs:
+        pair = hash_object.pairs[index.hash_key()]
+    return pair.value if pair != NULL else pair
 
 def eval_array_index_expression(array, index):
     array_object = array

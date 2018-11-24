@@ -27,6 +27,7 @@ class Null(Object):
         return "null"
 
 class Integer(Object):
+    key = None
     value = 0
     def __init__(self, value=0):
         self.value = value
@@ -35,9 +36,12 @@ class Integer(Object):
     def inspect(self):
         return str(self.value)
     def hash_key(self):
-        return HashKey(self.object_type(), self.value)
+        if self.key == None:
+            self.key = hash(self.value)
+        return self.key
 
 class Boolean(Object):
+    key = None
     value = False
     def __init__(self, value=False):
         self.value = value
@@ -48,9 +52,12 @@ class Boolean(Object):
     def hash_key(self):
         value = 0
         if not self.value: value = 1
-        return HashKey(self.object_type(), value)
+        if self.key == None:
+            self.key = hash(self.value)
+        return self.key
 
 class String(Object):
+    key = None
     value = ""
     def __init__(self, value=""):
         self.value = value
@@ -59,8 +66,9 @@ class String(Object):
     def inspect(self):
         return self.value
     def hash_key(self):
-        # print('object type', self.value)
-        return HashKey(self.value, hash(self.value.encode()))
+        if self.key == None:
+            self.key = hash(self.value.encode())
+        return self.key
 
 class ReturnValue(Object):
     value = None # Object
@@ -128,15 +136,6 @@ class Array(Object):
         out = '[' + ','.join(elements) + "]"
         return out
 
-class HashKey(Object):
-    key = None
-    value = 0
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-    def inspect(self):
-        return self.key
-
 class HashPair:
     key = None
     value = None
@@ -145,7 +144,7 @@ class HashPair:
         self.value = value
 
 class Hash(Object):
-    pairs = {} # <Hashkey, HashPair>
+    pairs = {} # <hash key, HashPair>
     def __init__(self, pairs):
         self.pairs = pairs
     def object_type(self):
