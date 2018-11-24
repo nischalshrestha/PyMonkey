@@ -59,10 +59,17 @@ def _push(*args):
     new_array.append(arguments[1])
     return Array(new_array)
 
+def _puts(*args):
+    for items in args:
+        for a in items:
+            print(a.inspect())
+    return None
+
 builtins = {
     'len': Builtin(_len),
     'first': Builtin(_first),
     'last': Builtin(_last),
     'push': Builtin(_push),
-    'rest': Builtin(_rest)
+    'rest': Builtin(_rest),
+    'puts': Builtin(_puts)
 }
