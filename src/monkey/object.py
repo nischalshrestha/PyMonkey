@@ -36,9 +36,7 @@ class Integer(Object):
     def inspect(self):
         return str(self.value)
     def hash_key(self):
-        if self.key == None:
-            self.key = hash(self.value)
-        return self.key
+        return HashKey(self.value, hash(self.value))
 
 class Boolean(Object):
     key = None
@@ -52,9 +50,7 @@ class Boolean(Object):
     def hash_key(self):
         value = 0
         if not self.value: value = 1
-        if self.key == None:
-            self.key = hash(self.value)
-        return self.key
+        return HashKey(self.value, hash(self.value))
 
 class String(Object):
     key = None
@@ -66,9 +62,10 @@ class String(Object):
     def inspect(self):
         return self.value
     def hash_key(self):
-        if self.key == None:
-            self.key = hash(self.value.encode())
-        return self.key
+        # if self.key == None:
+        #     self.key = hash(self.value.encode())
+        # return self.key
+        return HashKey(self.value, hash(self.value.encode()))
 
 class ReturnValue(Object):
     value = None # Object
@@ -135,6 +132,19 @@ class Array(Object):
             elements.append(e.inspect())
         out = '[' + ','.join(elements) + "]"
         return out
+
+class HashKey(Object):
+    key = None
+    value = 0
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+    def inspect(self):
+        return self.key
+    def __eq__(self, obj):
+        return isinstance(obj, HashKey) and self.key == obj.key and self.value == obj.value
+    def __hash__(self):
+        return hash(str(self.value))
 
 class HashPair:
     key = None

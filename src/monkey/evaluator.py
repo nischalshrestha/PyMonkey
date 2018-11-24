@@ -218,8 +218,9 @@ def eval_hash_index_expression(hash, index):
     if not callable(getattr(index, 'hash_key', None)):
         return new_error(f"unusable as hash key: {index.object_type()}")
     pair = NULL
-    if index.hash_key() in hash_object.pairs:
-        pair = hash_object.pairs[index.hash_key()]
+    key = index.hash_key()
+    if key in hash_object.pairs:
+        pair = hash_object.pairs[key]
     return pair.value if pair != NULL else pair
 
 def eval_array_index_expression(array, index):
