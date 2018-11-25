@@ -14,6 +14,7 @@ FUNCTION_OBJ = 'FUNCTION'
 BUILTIN_OBJ = 'BUILTIN'
 ARRAY_OBJ = 'ARRAY'
 HASH_OBJ = 'HASH'
+QUOTE_OBJ = 'QUOTE'
 
 # object "interface"
 class Object:
@@ -165,6 +166,15 @@ class Hash(Object):
             pairs.append(f"{key.inspect()}:  {value.value.inspect()}")
         out = "{" + ", ".join(pairs) + "}"
         return out
+
+class Quote(Object):
+    node = None # AST Node
+    def __init__(self, node):
+        self.node = node
+    def object_type(self):
+        return QUOTE_OBJ
+    def inspect(self):
+        return "QUOTE(" + node.string() + ")"
 
 NULL = Null()
 TRUE  = Boolean(True) 

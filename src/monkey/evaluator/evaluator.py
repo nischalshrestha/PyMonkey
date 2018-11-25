@@ -1,6 +1,7 @@
 from monkey import ast
 from monkey.object import *
 from .builtins import *
+from monkey.evaluator.quote_unquote import *
 
 # takes in ast.Node
 def Eval(node, env):
@@ -63,6 +64,8 @@ def Eval(node, env):
         body = node.body
         return Function(params, env, body)
     elif isinstance(node, ast.CallExpression):
+        if node.function.token_literal() == "quote":
+            return quote(node.arguments[0])
         function = Eval(node.function, env)
         if is_error(function):
             return function

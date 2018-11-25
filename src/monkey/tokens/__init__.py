@@ -1,1 +1,1 @@
-from . import token
+from .token import *
