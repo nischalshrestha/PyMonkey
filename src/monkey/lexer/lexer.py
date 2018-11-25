@@ -1,4 +1,4 @@
-from monkey import token
+from monkey.tokens import token
 from monkey import ast
 
 class Lexer:

@@ -1,7 +1,8 @@
-# import keyboard
 from monkey import lexer
+from monkey.object import environment
 from monkey import parser
 from monkey import evaluator
+import keyboard
 
 prompt = ">> "
 MONKEY_FACE = '''
@@ -20,7 +21,7 @@ MONKEY_FACE = '''
 
 def start():
     # need one instance since we are persisting values
-    env = evaluator.new_environment()
+    env = environment.new_environment()
     while True:
         line = input(prompt)
         if line == 'exit()':

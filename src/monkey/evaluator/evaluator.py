@@ -1,7 +1,6 @@
 from monkey import ast
 from monkey.object import *
-from monkey.environment import *
-from monkey.builtins import *
+from .builtins import *
 
 # takes in ast.Node
 def Eval(node, env):

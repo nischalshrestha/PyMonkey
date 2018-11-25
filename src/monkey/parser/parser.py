@@ -1,4 +1,4 @@
-from monkey import token
+from monkey.tokens import token
 from monkey import lexer
 from monkey import ast
 from monkey import parser_tracing

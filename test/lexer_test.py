@@ -1,8 +1,8 @@
 import unittest
 import sys
 sys.path.append("../src/")
-from monkey import token
-from monkey import lexer
+from monkey.tokens import token
+from monkey.lexer import lexer
 
 class LexerTest(unittest.TestCase):
 

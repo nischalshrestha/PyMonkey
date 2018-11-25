@@ -1,10 +1,10 @@
 import unittest
 import sys
 sys.path.append("../src/")
-from monkey import token
-from monkey import lexer
-from monkey import ast
-from monkey import parser
+from monkey.tokens import token
+from monkey.lexer import lexer
+from monkey.ast import ast
+from monkey.parser import parser
 
 class ParserTest(unittest.TestCase):
 

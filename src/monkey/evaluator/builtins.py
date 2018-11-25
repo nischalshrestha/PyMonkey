@@ -66,10 +66,10 @@ def _puts(*args):
     return None
 
 builtins = {
-    'len': Builtin(_len),
-    'first': Builtin(_first),
-    'last': Builtin(_last),
-    'push': Builtin(_push),
-    'rest': Builtin(_rest),
-    'puts': Builtin(_puts)
+    'len': object.Builtin(_len),
+    'first': object.Builtin(_first),
+    'last': object.Builtin(_last),
+    'push': object.Builtin(_push),
+    'rest': object.Builtin(_rest),
+    'puts': object.Builtin(_puts)
 }

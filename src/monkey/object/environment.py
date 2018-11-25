@@ -1,5 +1,3 @@
-
-
 class Environment:
     outer = None # pointer to enclosing Environment
     store = {} # str

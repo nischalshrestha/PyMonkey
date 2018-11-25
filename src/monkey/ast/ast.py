@@ -1,5 +1,5 @@
 # from typing import NamedTuple
-from monkey import token
+from monkey.tokens import token
 
 class Node:
     # this method used only for debugging

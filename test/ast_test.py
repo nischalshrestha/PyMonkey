@@ -1,8 +1,8 @@
 import unittest
 import sys
 sys.path.append("../src/")
-from monkey import token
-from monkey import ast
+from monkey.tokens import token
+from monkey.ast import ast
 
 class AstTest(unittest.TestCase):
 

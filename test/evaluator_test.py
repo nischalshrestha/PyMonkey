@@ -1,11 +1,11 @@
 import unittest
 import sys
 sys.path.append("../src/")
-from monkey import token
-from monkey import lexer
-from monkey import ast
-from monkey import parser
-from monkey import evaluator as e
+from monkey.tokens import token
+from monkey.lexer import lexer
+from monkey.ast import ast
+from monkey.parser import parser
+from monkey.evaluator import evaluator as e
 from monkey.object import *
 
 class EvaluatorTest(unittest.TestCase):
