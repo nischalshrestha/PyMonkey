@@ -95,7 +95,7 @@ class ExpressionStatement(Statement):
     token = None 
     expression = None # Expression
 
-    def __init__(self, token, expression=None):
+    def __init__(self, token=None, expression=None):
         self.token = token
         self.expression = expression
     
@@ -106,20 +106,26 @@ class ExpressionStatement(Statement):
         if self.expression != None:
             return self.expression.string()
         return ""
+    
+    def __eq__(self, other):
+        return isinstance(other, ExpressionStatement) and self.__dict__ == other.__dict__
 
 class IntegerLiteral(Expression):
     token = None # Token
     value = 0 # integer
 
-    def __init__(self, token, value=0):
+    def __init__(self, token=None, value=0):
         self.token = token
-        self.value = 0
+        self.value = value
 
     def token_literal(self):
         return self.token.Literal
     
     def string(self):
         return str(self.value)
+
+    def __eq__(self, other):
+        return isinstance(other, IntegerLiteral) and self.__dict__ == other.__dict__
 
 class StringLiteral(Expression):
     token = None # Token

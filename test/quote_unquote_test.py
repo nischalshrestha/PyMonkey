@@ -31,9 +31,22 @@ class TestQuote(unittest.TestCase):
             self.assertEqual(quote.node.string(), t[1], 
                 'not equal. got={} want={}'.format(quote.node.string(), t[1]))
 
+    def test_quote_unquote(self):
+        tests = [
+            ('quote(unquote(4))', '4'),
+            ('quote(unquote(4 + 4))', '8'),
+            ('quote(8 + unquote(4 + 4))', '(8 + 8)'),
+            ('quote(unquote(4 + 4) + 8)', '(8 + 8)')
+        ]
+        for t in tests:
+            evaluated = self.check_eval(t[0])
+            quote = evaluated
+            self.assertTrue(isinstance(quote, Quote), 
+                f'expected Quote. got={type(quote)} {quote}')
+            self.assertIsNotNone(quote, 'quote.Node is None')
+            self.assertEqual(quote.node.string(), t[1], 
+                'not equal. got={} want={}'.format(quote.node.string(), t[1]))
+
 if __name__ == '__main__':
     unittest.main()
-                
     
-
-
