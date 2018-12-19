@@ -12,4 +12,12 @@ def Modify(node, modifier):
             node.statements[i] = Modify(statement, modifier)
     elif isinstance(node, ast.ExpressionStatement):
         node.expression = Modify(node.expression, modifier)
+    elif isinstance(node, ast.InfixExpression): 
+        node.left = Modify(node.left, modifier)
+        node.right = Modify(node.right, modifier)
+    elif isinstance(node, ast.PrefixExpression):
+        node.right = Modify(node.right, modifier)
+    elif isinstance(node, ast.IndexExpression):
+        node.left = Modify(node.left, modifier)
+        node.index = Modify(node.index, modifier)
     return modifier(node)

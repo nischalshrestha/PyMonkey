@@ -146,7 +146,7 @@ class PrefixExpression(Expression):
     operator = ""
     right = None # Expression
 
-    def __init__(self, token, operator="", right=None):
+    def __init__(self, token=None, operator="", right=None):
         self.token = token
         self.operator = operator
         self.right = right
@@ -158,13 +158,17 @@ class PrefixExpression(Expression):
         out = "(" + self.operator + self.right.string() + ")" 
         return out
 
+    def __eq__(self, other):
+        return isinstance(other, PrefixExpression) and self.__dict__ == other.__dict__
+
+
 class InfixExpression(Expression):
     token = None # Token
     left = None # Expression
     operator = ""
     right = None # Expression
 
-    def __init__(self, token, operator="", left=None, right=None):
+    def __init__(self, token=None, operator="", left=None, right=None):
         self.token = token
         self.left = left
         self.operator = operator
@@ -176,6 +180,10 @@ class InfixExpression(Expression):
     def string(self):
         out = "(" + self.left.string() + " " + self.operator + " " + self.right.string() + ")"
         return out
+
+    def __eq__(self, other):
+        return isinstance(other, InfixExpression) and self.__dict__ == other.__dict__
+    
 
 class Boolean(Expression):
     token = None
@@ -303,7 +311,7 @@ class IndexExpression(Expression):
     left = None # Expression
     index = None # Expression
 
-    def __init__(self, token, left=None, index=None):
+    def __init__(self, token=None, left=None, index=None):
         self.token = token
         self.left = left
         self.index = index
@@ -314,6 +322,9 @@ class IndexExpression(Expression):
     def string(self):
         out = "(" + self.left.string() + "[" +  self.index.string() + "])"
         return out
+
+    def __eq__(self, other):
+        return isinstance(other, IndexExpression) and self.__dict__ == other.__dict__
 
 class HashLiteral(Expression):
     token = None # { token

@@ -63,9 +63,6 @@ class String(Object):
     def inspect(self):
         return self.value
     def hash_key(self):
-        # if self.key == None:
-        #     self.key = hash(self.value.encode())
-        # return self.key
         return HashKey(self.value, hash(self.value.encode()))
 
 class ReturnValue(Object):
