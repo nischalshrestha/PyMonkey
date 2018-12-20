@@ -56,7 +56,7 @@ class LetStatement(Statement):
     name = None # Identifier
     value = None # Expression
 
-    def __init__(self, token, name=None, value=None):
+    def __init__(self, token=None, name=None, value=None):
         self.token = token
         self.name = name
         self.value = value
@@ -72,14 +72,17 @@ class LetStatement(Statement):
             out = out + self.value.string()
         out = out + ";"
         return out
+    
+    def __eq__(self, other):
+        return isinstance(other, LetStatement) and self.__dict__ == other.__dict__
 
 class ReturnStatement(Statement):
     token = None # Token
     return_value = None # Expression
 
-    def __init__(self, token, value=None):
+    def __init__(self, token=None, return_value=None):
         self.token = token
-        self.value = value
+        self.return_value = return_value
 
     def token_literal(self):
         return self.token.Literal
@@ -90,6 +93,10 @@ class ReturnStatement(Statement):
             out = out + self.return_value.string()
         out = out + ";"
         return out
+
+    def __eq__(self, other):
+        return isinstance(other, ReturnStatement) and self.__dict__ == other.__dict__
+    
 
 class ExpressionStatement(Statement):
     token = None 
@@ -107,6 +114,9 @@ class ExpressionStatement(Statement):
             return self.expression.string()
         return ""
     
+    def __hash__(self):
+        return hash(str(self.expression))
+
     def __eq__(self, other):
         return isinstance(other, ExpressionStatement) and self.__dict__ == other.__dict__
 
@@ -123,6 +133,9 @@ class IntegerLiteral(Expression):
     
     def string(self):
         return str(self.value)
+
+    def __hash__(self):
+        return hash(self.value)
 
     def __eq__(self, other):
         return isinstance(other, IntegerLiteral) and self.__dict__ == other.__dict__
@@ -181,6 +194,9 @@ class InfixExpression(Expression):
         out = "(" + self.left.string() + " " + self.operator + " " + self.right.string() + ")"
         return out
 
+    def __hash__(self):
+        return hash(self.left)
+
     def __eq__(self, other):
         return isinstance(other, InfixExpression) and self.__dict__ == other.__dict__
     
@@ -205,7 +221,7 @@ class IfExpression(Expression):
     consequence = None # BlockStatement
     alternative = None # BlockStatement
 
-    def __init__(self, token, condition=None, consequence=None, alternative=None):
+    def __init__(self, token=None, condition=None, consequence=None, alternative=None):
         self.token = token
         self.condition = condition
         self.consequence = consequence
@@ -219,12 +235,15 @@ class IfExpression(Expression):
         if self.alternative != None:
             out = out + "else " + self.alternative.string()
         return out
+    
+    def __eq__(self, other):
+        return isinstance(other, IfExpression) and self.__dict__ == other.__dict__
 
 class BlockStatement(Statement):
     token = None 
     statements = [] # Statement(s)
 
-    def __init__(self, token, statements=None):
+    def __init__(self, token=None, statements=None):
         self.token = token
         if statements == None:
             statements = []
@@ -238,6 +257,9 @@ class BlockStatement(Statement):
         for s in self.statements:
             out = out + s.string()
         return out
+    
+    def __eq__(self, other):
+        return isinstance(other, BlockStatement) and self.__dict__ == other.__dict__
 
 class CallExpression(Expression):
 
@@ -268,7 +290,7 @@ class FunctionLiteral(Expression):
     parameters = [] # Identifier
     body = None # BlockStatement
 
-    def __init__(self, token, parameters=None, body=None):
+    def __init__(self, token=None, parameters=None, body=None):
         self.token = token
         if parameters == None:
             parameters = []
@@ -286,11 +308,14 @@ class FunctionLiteral(Expression):
         out = out + "(" + ", ".join(args) + ")"
         return out
 
+    def __eq__(self, other):
+        return isinstance(other, FunctionLiteral) and self.__dict__ == other.__dict__
+
 class ArrayLiteral(Expression):
     token = None
     elements = [] # Expression
 
-    def __init__(self, token, elements=None):
+    def __init__(self, token=None, elements=None):
         self.token = token
         if elements == None:
             elements = []
@@ -305,6 +330,9 @@ class ArrayLiteral(Expression):
             elements.append(e.string())
         out = "[" + ", ".join(elements) + "]"
         return out
+    
+    def __eq__(self, other):
+        return isinstance(other, ArrayLiteral) and self.__dict__ == other.__dict__
 
 class IndexExpression(Expression):
     token = None
@@ -328,9 +356,9 @@ class IndexExpression(Expression):
 
 class HashLiteral(Expression):
     token = None # { token
-    pairs = {} # Expression
+    pairs = {} # Dict[Expression]
 
-    def __init__(self, token, pairs=None):
+    def __init__(self, token=None, pairs=None):
         self.token = token
         self.pairs = pairs
     
@@ -343,3 +371,6 @@ class HashLiteral(Expression):
             pairs.append(key.string() + ":" + value.string())
         out = "{" + ", ".join(pairs) + "}"
         return out
+    
+    def __eq__(self, other):
+        return isinstance(other, HashLiteral) and self.__dict__ == other.__dict__
