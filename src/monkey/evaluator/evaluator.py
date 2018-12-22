@@ -65,7 +65,7 @@ def Eval(node, env):
         return Function(params, env, body)
     elif isinstance(node, ast.CallExpression):
         if node.function.token_literal() == "quote":
-            return quote(node.arguments[0])
+            return quote(node.arguments[0], env)
         function = Eval(node.function, env)
         if is_error(function):
             return function
