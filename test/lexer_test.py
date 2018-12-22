@@ -29,6 +29,9 @@ class LexerTest(unittest.TestCase):
                     "foobar" 
                     "foo bar"
                     [1, 2];
+                    macro(x, y) { 
+                        x + y; 
+                    };
                     '''
         self.lexer = lexer.new(self.source)
     
@@ -114,6 +117,19 @@ class LexerTest(unittest.TestCase):
             (token.COMMA, ","),
             (token.INT, "2"),
             (token.RBRACKET, "]"),
+            (token.SEMICOLON, ";"),
+            (token.MACRO, "macro"), 
+            (token.LPAREN, "("), 
+            (token.IDENT, "x"), 
+            (token.COMMA, ","), 
+            (token.IDENT, "y"), 
+            (token.RPAREN, ")"), 
+            (token.LBRACE, "{"), 
+            (token.IDENT, "x"), 
+            (token.PLUS, "+"),
+            (token.IDENT, "y"), 
+            (token.SEMICOLON, ";"), 
+            (token.RBRACE, "}"), 
             (token.SEMICOLON, ";"),
             (token.EOF, ""),
         ]

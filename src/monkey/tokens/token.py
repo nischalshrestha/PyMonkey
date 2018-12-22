@@ -42,6 +42,7 @@ FALSE    = "FALSE"
 IF       = "IF"
 ELSE     = "ELSE"
 RETURN   = "RETURN"
+MACRO    = "MACRO"
 
 # immutable 'struct'
 class Token(NamedTuple):
@@ -56,6 +57,7 @@ keywords = {
     'if': IF,
     'else': ELSE,
     'return': RETURN,
+    'macro': MACRO
 }
 
 def lookup_ident(ident):

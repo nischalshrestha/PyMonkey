@@ -374,3 +374,29 @@ class HashLiteral(Expression):
     
     def __eq__(self, other):
         return isinstance(other, HashLiteral) and self.__dict__ == other.__dict__
+
+class MacroLiteral(Expression):
+    token = None # macro literal
+    parameters = [] # Identifier
+    body = None # BlockStatement
+
+    def __init__(self, token=None, parameters=None, body=None):
+        self.token = token
+        if parameters == None:
+            parameters = []
+        self.parameters = parameters
+        self.body = body
+
+    def token_literal(self):
+        return self.token.Literal
+    
+    def string(self):
+        args  = []
+        for a in self.arguments:
+            args.append(a.string())
+        out = "" + self.token_literal()
+        out = out + "(" + ", ".join(args) + ")"
+        return out
+
+    def __eq__(self, other):
+        return isinstance(other, MacroLiteral) and self.__dict__ == other.__dict__

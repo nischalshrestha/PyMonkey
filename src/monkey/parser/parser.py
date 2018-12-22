@@ -206,6 +206,16 @@ class Parser:
                 block.statements.append(stmt)
             self.next_token()
         return block
+
+    def parse_macro_literal(self):
+        lit = ast.MacroLiteral(self.cur_token)
+        if not self.expect_peek(token.LPAREN):
+            return None
+        lit.parameters = self.parse_function_parameters()
+        if not self.expect_peek(token.LBRACE):
+            return None
+        lit.body = self.parse_block_statement()
+        return lit
     
     def parse_function_literal(self):
         lit = ast.FunctionLiteral(self.cur_token)
@@ -324,6 +334,7 @@ def new(lexer):
     p.register_prefix(token.FUNCTION, p.parse_function_literal)
     p.register_prefix(token.LBRACKET, p.parse_array_literal)
     p.register_prefix(token.LBRACE, p.parse_hash_literal)
+    p.register_prefix(token.MACRO, p.parse_macro_literal)
     # infix
     p.register_infix(token.PLUS, p.parse_infix_expression) 
     p.register_infix(token.MINUS, p.parse_infix_expression) 

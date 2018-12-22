@@ -590,6 +590,31 @@ class ParserTest(unittest.TestCase):
                 msg=f"no test function for key {key} found")
             test_func = tests[key.string()]
             test_func(value)
+    
+    def test_macro_literals(self):
+        source = 'macro(x, y) { x + y; }'
+        l = lexer.new(source)
+        p = parser.new(l)
+        program = p.parse_program()
+        self.check_parse_errors(p)
+        self.assertEqual(len(program.statements), 1, 
+            msg='program does not have enough statements. got={}'.format(len(program.statements)))
+        stmt = program.statements[0]
+        self.assertTrue(isinstance(stmt, ast.ExpressionStatement),
+            msg='program.statements[0] is not ast.ExpressionStatement. got={}'.format(type(stmt)))
+        macro = stmt.expression
+        if not isinstance(macro, ast.MacroLiteral):
+            print('macro is not ast.MacroLiteral. got={}'.format(type(macro)))
+        self.assertEqual(len(macro.parameters), 2, 
+            msg='macro literal parameters wrong. want 2, got={}'.format(len(macro.parameters)))
+        self.check_literal_expression(macro.parameters[0], 'x')
+        self.check_literal_expression(macro.parameters[1], 'y')
+        self.assertEqual(len(macro.body.statements), 1, 
+            msg='macro.body.statements does not have 1 statement, got={}'.format(len(macro.body.statements)))
+        body_stmt = macro.body.statements[0]
+        if not isinstance(body_stmt, ast.ExpressionStatement):
+            print('macro body statement is not ast.ExpressionStatement. got={}'.format(type(body_stmt)))
+        self.check_infix_expression(body_stmt.expression, 'x', '+', 'y')
 
     def check_parse_errors(self, p):
         errors = p.errors
