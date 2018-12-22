@@ -28,5 +28,14 @@ def convert_object_to_astnode(obj):
     if isinstance(obj, object.Integer):
         t = token.Token(Type=token.INT, Literal=str(obj.value))
         return ast.IntegerLiteral(t, obj.value)
+    if isinstance(obj, object.Boolean):
+        if obj.value:
+            t = token.Token(Type=token.TRUE, Literal='true')
+        else:
+            t = token.Token(Type=token.FALSE, Literal='false')
+        return ast.Boolean(t, obj.value)
+    if isinstance(obj, object.Quote):
+        # Quote already has the ASTNode object so just return it!
+        return obj.node
     return None
         
