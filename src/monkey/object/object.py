@@ -15,6 +15,7 @@ BUILTIN_OBJ = 'BUILTIN'
 ARRAY_OBJ = 'ARRAY'
 HASH_OBJ = 'HASH'
 QUOTE_OBJ = 'QUOTE'
+MACRO_OBJ = 'MACRO'
 
 # object "interface"
 class Object:
@@ -172,6 +173,32 @@ class Quote(Object):
         return QUOTE_OBJ
     def inspect(self):
         return "QUOTE(" + node.string() + ")"
+
+class Macro(Object):
+    parameters = [] # Identifier
+    body = None # BlockStatement
+    env = None # Environment
+
+    def __init__(self, parameters=None, env=None, body=None):
+        if parameters == None:
+            parameters = []
+        self.parameters = parameters
+        self.env = env
+        self.body = body
+
+    def object_type(self):
+        return MACRO_OBJ
+
+    def inspect(self):
+        params = []
+        for p in self.parameters:
+            params.append(p.string())
+        out = 'macro('
+        out = out + ','.join(params)
+        out = out + ') {\n'
+        out = out + self.body.string()
+        out = out + '\n}'
+        return out
 
 NULL = Null()
 TRUE  = Boolean(True) 
