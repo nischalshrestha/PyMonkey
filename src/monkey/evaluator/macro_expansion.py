@@ -1,3 +1,7 @@
+"""
+Functions to assist in finding macros and expanding them
+"""
+
 import sys
 from monkey import ast
 from monkey import object

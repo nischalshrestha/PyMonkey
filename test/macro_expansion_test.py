@@ -69,7 +69,7 @@ class TestMacros(unittest.TestCase):
                     puts("not greater");
                 } else {
                     puts("greater");
-                });
+                };
                 '''
             ),
         ]
@@ -83,7 +83,7 @@ class TestMacros(unittest.TestCase):
                 msg="not equal. want={}, got={}".format(expected.string(), expanded.string()))
         # Test this in REPL:
         # let unless = macro( condition, consequence, alternative) { quote( if (!( unquote( condition))) { unquote( consequence); } else { unquote( alternative); }); };
-        
+
     def get_parse_program(self, source):
         l = lexer.new(source)
         p = parser.new(l)

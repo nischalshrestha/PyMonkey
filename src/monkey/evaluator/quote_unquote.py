@@ -1,3 +1,7 @@
+"""
+Functions to create Quote objects and evaluate unquotes
+"""
+
 from monkey import ast
 from monkey import object
 from monkey import evaluator
