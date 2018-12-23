@@ -20,7 +20,7 @@ Python version of the [Monkey](https://interpreterbook.com/#the-monkey-programmi
 - [x] Built-in types and functions
 
 #### Extras
-- [ ] Macros
+- [x] Macros
 
 #### Possible Future extensions
 - Better error handling (stack trace)
