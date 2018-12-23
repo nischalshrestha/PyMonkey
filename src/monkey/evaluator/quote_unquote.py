@@ -9,6 +9,7 @@ def quote(node, env):
 
 def eval_unquote_calls(quoted, env):
     def modifier(node):
+        # TODO make variables more explicit here
         if not is_unquote_call(node):
             return node
         if not isinstance(node, ast.CallExpression):

@@ -37,6 +37,53 @@ class TestMacros(unittest.TestCase):
         self.assertEqual(macro.body.string(), expected_body, 
             msg='body is not {}. got={}'.format(expected_body, macro.body.string()))
 
+    def test_expand_macros(self):
+        tests = [
+            (
+                '''
+                let infixExpression = macro () { quote (1 + 2); };
+                infixExpression()
+                ''', 
+                '(1 + 2)'
+            ),
+            (
+                '''
+                let reverse = macro (a, b) { quote(unquote(b) - unquote(a)); };
+                reverse(2 + 2, 10 - 5)
+                ''', 
+                '(10 - 5) - (2 + 2)'
+            ),
+            (
+                '''
+                let unless = macro (condition, consequence, alternative) {
+                    quote(if (!unquote(condition)) {
+                        unquote(consequence);
+                    } else {
+                        unquote(alternative);
+                    });
+                };
+                unless(10 < 5, puts("not greater"), puts("greater"))
+                ''', 
+                ''''
+                if (!(10 < 5)) {
+                    puts("not greater");
+                } else {
+                    puts("greater");
+                });
+                '''
+            ),
+        ]
+        for t in tests:
+            expected = self.get_parse_program(t[1])
+            program = self.get_parse_program(t[0])
+            env = e.new_environment()
+            macro_expansion.DefineMacros(program, env)
+            expanded = macro_expansion.ExpandMacros(program, env)
+            self.assertEqual(expanded.string(), expected.string(),
+                msg="not equal. want={}, got={}".format(expected.string(), expanded.string()))
+        # Test this in REPL:
+        # let unless = macro( condition, consequence, alternative) { quote( if (!( unquote( condition))) { unquote( consequence); } else { unquote( alternative); }); };
+        
     def get_parse_program(self, source):
         l = lexer.new(source)
         p = parser.new(l)
