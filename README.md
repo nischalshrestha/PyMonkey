@@ -22,6 +22,14 @@ Python version of the [Monkey](https://interpreterbook.com/#the-monkey-programmi
 #### Extras
 - [x] Macros
 
+#### Compiler
+
+- [ ] Compile expressions
+- [ ] Conditionals
+- [ ] Data structures
+- [ ] Functions
+- [ ] Closures
+
 #### Possible Future extensions
 - Better error handling (stack trace)
 - More operators like postfix (e.g. ++, --) or ternary
