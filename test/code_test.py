@@ -1,5 +1,6 @@
 import unittest
 from collections import namedtuple
+from typing import NamedTuple
 import sys
 sys.path.append("../src/")
 from monkey.tokens import token
@@ -14,7 +15,15 @@ class CodeTest(unittest.TestCase):
 
     def test_eval_integer_expression(self):
         tests = [
-            (OpConstant, [65534], [bytes(OpConstant), 255, 254]),
+            (
+                OpConstant, 
+                [65534], 
+                [
+                    bytes(OpConstant), 
+                    (255).to_bytes(1, byteorder='big'), 
+                    (254).to_bytes(1, byteorder='big')
+                ]
+            ),
         ]
         for t in tests:
             instruction = Make(t[0], *t[1])
@@ -25,26 +34,24 @@ class CodeTest(unittest.TestCase):
                     msg=f'wrong byte at position {i}. want={t[2][i]}, got={instruction[i]}')
     
     def test_instructions_string(self):
-        instructions = Instructions([Make(OpConstant, 1), Make(OpConstant, 2), Make(OpConstant, 65535)])
-        expected = '''
-        0000 OpConstant 1 
-        0003 OpConstant 2 
-        0006 OpConstant 65535
-        '''
+        ins = Instructions([Make(OpConstant, 1), Make(OpConstant, 2), Make(OpConstant, 65535)])
+        expected = '''0000 OpConstant 1\n0003 OpConstant 2\n0006 OpConstant 65535\n'''
         concatted = Instructions()
-        for ins in instructions.instructions:
-            concatted.instructions.extend(ins)
+        for i in ins.instructions:
+            concatted.instructions.extend(i)
         self.assertEqual(concatted.string(), expected,
-            msg=f'instruction wrongly formatted.\nwant={expected}\ngot={concatted.string()}')
+            msg=f'instruction wrongly formatted.\nwant={expected}\ngot=\n{concatted.string()}')
 
     def test_read_operands(self):
-        test_struct = namedtuple('test_struct', 'op operands bytesread')
-        tests = [test_struct(OpConstant, [65535], 2)]
+        class TestStruct(NamedTuple):
+            op: bytes
+            operands: List[int]
+            bytesread: int
+        tests = [TestStruct(OpConstant, [65535], 2)]
         for t in tests:
-            # print(t.op, t.operands, t.bytesread)
             instruction = Make(t.op, *t.operands)
-            defn = lookup(bytes(t.op))
-            self.assertIsNotNone(defn, msg=f'definition not found: {defn}\n')
+            defn, err = lookup(bytes(t.op))
+            self.assertIsNotNone(defn, msg=f'definition not found: {err}\n')
             operands_read, n = read_operands(defn, instruction[1:])
             self.assertEqual(n, t.bytesread, msg=f'n wrong. want={t.bytesread}, got={n}')
             for i, want in enumerate(t.operands):
