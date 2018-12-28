@@ -17,7 +17,6 @@ CompilerTestCase = namedtuple('CompilerTestCase', 'source expected_constants exp
 class CompilerTest(unittest.TestCase):
 
     def test_integer_arithmetic(self):
-
         tests = [
             CompilerTestCase("1 + 2", [1, 2], [Make(OpConstant, 0), Make(OpConstant, 1)])
         ]
@@ -39,22 +38,22 @@ class CompilerTest(unittest.TestCase):
         concatted = self.concat_instructions(expected)
         print('expected_instructions', concatted)
         print('bytecode_instructions', actual)
-        self.assertEqual(len(actual), len(concatted), 
-            msg=f'wrong instruction length.\nwant={len(concatted)}\ngot={len(actual)}')
+        self.assertEqual(len(actual), len(concatted.instructions), 
+            msg=f'wrong instruction length.\nwant=\n{str(concatted)}\ngot=\n{str(actual)}')
         for i, ins in enumerate(concatted):
             self.assertEqual(actual[i], concatted[i], 
-                msg=f'wrong instruction at {i}\nwant={concatted[i]}\ngot={actual[i]}')
+                msg=f'wrong instruction at {i}\nwant=\n{concatted[i]}\ngot={actual[i]}')
         return None
     
     def concat_instructions(self, instructions):
-        out = []
+        out = Instructions()
         for ins in instructions:
-            out.extend(ins)
+            out.instructions.extend(ins)
         return out
     
     def check_constants(self, expected, actual):
         self.assertEqual(len(expected), len(actual),
-            msg=f'wrong number of constatnts.\nwant={len(actual)}\ngot={len(expected)}')
+            msg=f'wrong number of constatnts.\nwant=\n{len(actual)}\ngot={len(expected)}')
         for i, constant in enumerate(expected):
             if isinstance(constant, int):
                 err = self.check_integer_object(constant, actual[i])

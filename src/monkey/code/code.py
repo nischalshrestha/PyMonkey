@@ -6,7 +6,7 @@ from ctypes import c_uint16
 from ctypes import c_int16
 import math
 
-# For the sake of being explicit we definite expected types
+# For the sake of being explicit we define expected types
 class Instructions:
     instructions = []
 
@@ -16,7 +16,7 @@ class Instructions:
         else:
             self.instructions = instructions
 
-    def string(self):
+    def __str__(self):
         out = ''
         i = 0
         ins = self.instructions

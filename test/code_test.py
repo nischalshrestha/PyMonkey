@@ -1,6 +1,5 @@
 import unittest
 from collections import namedtuple
-from typing import NamedTuple
 import sys
 sys.path.append("../src/")
 from monkey.tokens import token
@@ -35,19 +34,16 @@ class CodeTest(unittest.TestCase):
     
     def test_instructions_string(self):
         ins = Instructions([Make(OpConstant, 1), Make(OpConstant, 2), Make(OpConstant, 65535)])
-        expected = '''0000 OpConstant 1\n0003 OpConstant 2\n0006 OpConstant 65535\n'''
+        expected = '''0000 OpConstant 1\n0003 OpConstant 32\n0006 OpConstant 65535\n'''
         concatted = Instructions()
         for i in ins.instructions:
             concatted.instructions.extend(i)
-        self.assertEqual(concatted.string(), expected,
-            msg=f'instruction wrongly formatted.\nwant={expected}\ngot=\n{concatted.string()}')
+        self.assertEqual(str(concatted), expected,
+            msg=f'instruction wrongly formatted.\nwant=\n{expected}\ngot=\n{str(concatted)}')
 
     def test_read_operands(self):
-        class TestStruct(NamedTuple):
-            op: bytes
-            operands: List[int]
-            bytesread: int
-        tests = [TestStruct(OpConstant, [65535], 2)]
+        test_struct = namedtuple('test_struct', ['op', 'operands', 'bytesread'])
+        tests = [test_struct(OpConstant, [65535], 2)]
         for t in tests:
             instruction = Make(t.op, *t.operands)
             defn, err = lookup(bytes(t.op))
