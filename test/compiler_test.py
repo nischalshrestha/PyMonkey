@@ -36,13 +36,11 @@ class CompilerTest(unittest.TestCase):
 
     def check_instructions(self, expected, actual):
         concatted = self.concat_instructions(expected)
-        print('expected_instructions', concatted)
-        print('bytecode_instructions', actual)
         self.assertEqual(len(actual), len(concatted.instructions), 
             msg=f'wrong instruction length.\nwant=\n{str(concatted)}\ngot=\n{str(actual)}')
-        for i, ins in enumerate(concatted):
-            self.assertEqual(actual[i], concatted[i], 
-                msg=f'wrong instruction at {i}\nwant=\n{concatted[i]}\ngot={actual[i]}')
+        for i, ins in enumerate(concatted.instructions):
+            self.assertEqual(actual[i], concatted.instructions[i], 
+                msg=f'wrong instruction at {i}\nwant=\n{concatted.instructions[i]}\ngot={actual[i]}')
         return None
     
     def concat_instructions(self, instructions):
