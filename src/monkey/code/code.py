@@ -1,19 +1,25 @@
+"""
+This module defines OpCodes and the Instructions class representing a bytecode
+instruction for Monkey.
+
+For the sake of being explicit we define expected types with typing module
+"""
+
 from typing import NamedTuple
 from typing import NewType
 from typing import List
 from enum import Enum, auto
 from ctypes import c_uint16
-from ctypes import c_int16
 import math
 
-# For the sake of being explicit we define expected types
+from monkey.common import utilities
+
 class Instructions:
-    instructions = []
+
+    instructions: bytearray = None
 
     def __init__(self, instructions=None):
-        if instructions == None:
-            self.instructions = []
-        else:
+        if instructions != None:
             self.instructions = instructions
 
     def __str__(self):
@@ -27,17 +33,20 @@ class Instructions:
                 i += 1
                 continue
             operands, read = read_operands(defn, ins[i+1:])
-            out += ('{0:04d} {1}\n'.format(i, self.string_instruction(defn, operands)))          
+            out += ('{0:04d} {1}\n'.format(i, self.string_instruction(defn, operands)))     
             i += 1 + read
         return out
     
     def string_instruction(self, defn, operands):
-        # print('defn', defn)
         operand_count = len(defn.operand_widths)
-        if len(operands) != operand_count:
+        operand = c_uint16(int.from_bytes(operands, byteorder='big')).value
+        # For now, this is a hack to check operand length since len() works
+        # differently for bytearray compared to lists
+        length = len([int.from_bytes(operands, byteorder='big')])
+        if length != operand_count:
             return (f'ERROR: operand len {len(operands)} does not match defined {operand_count}\n')
         if operand_count == 1:
-            return (f'{defn.name} {operands[0]}')
+            return (f'{defn.name} {operand}')
         return (f'ERROR: unhandled operand_count for {operand_count}\n')
 
 OpCode = NewType('OpCode', bytes)
@@ -54,12 +63,12 @@ class ByteEnum(Enum):
         """
         for last_value in reversed(last_values):
             try:
-                globals()[name] = bytes([last_value + 1])
+                globals()[name] = last_value + 1
                 return last_value + 1
             except TypeError:
                 pass
         else:
-            globals()[name] = bytes([start])
+            globals()[name] = start
             return start
 
 class OpCodes(ByteEnum):
@@ -90,9 +99,12 @@ def Make(op, *operands):
     instruction_len = 1 # opcode counts
     for w in defn.operand_widths:
         instruction_len += w
-    instruction = [None for x in range(instruction_len)]
-    instruction[0] = bytes(op)
+    # instruction byte size is opcode plus operand_widths
+    instruction = bytearray(1 + defn.operand_widths[0])
+    instruction[0] = op
     offset = 1
+    # We can do almost all string operators with bytes w. exceptions:
+    # https://docs.python.org/3.3/library/stdtypes.html#bytes-methods
     for i, o in enumerate(operands):
         width = defn.operand_widths[i]
         if width == 2:
@@ -102,14 +114,10 @@ def Make(op, *operands):
 
 def put_int_16(array, unint16):
     """
-    Constructs and returns an array with the appropriate number of bytes 
+    Constructs and returns a bytearray with the appropriate bytes 
     representing an usigned int
     """
-    new_array = []
-    byte_array = (unint16).to_bytes(byte_size(unint16), byteorder='big')
-    for i in byte_array:
-        new_array.append(bytes([i]))
-    return new_array
+    return bytearray((unint16).to_bytes(byte_size(unint16), byteorder='big'))
 
 def byte_size(integer):
     """
@@ -121,18 +129,10 @@ def byte_size(integer):
 
 def read_operands(defn, ins):
     total_width = len(defn.operand_widths)
-    operands = [None for x in range(total_width)]
+    operands = bytearray(len(defn.operand_widths))
     offset = 0
     for i, width in enumerate(defn.operand_widths):
         if width == 2:
-            operands[i] = bytes_to_int(ins[offset:total_width+1])
+            operands[i:i+width] = ins[offset:offset+width]
         offset += width
     return operands, offset
-
-def bytes_to_int(ins):
-    concatted = ins[0]
-    for i in range(1, len(ins)):
-        concatted += ins[i]
-    return c_uint16(int.from_bytes(concatted, byteorder='big')).value
-
-# print(lookup(OpConstant))

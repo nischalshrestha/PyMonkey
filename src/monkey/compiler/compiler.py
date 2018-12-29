@@ -49,7 +49,7 @@ class Compiler:
 
     def add_instruction(self, *ins):
         pos_new_instruction = len(self.instructions)
-        self.instructions.extend(*ins)
+        self.instructions += ins
         return pos_new_instruction
     
     def bytecode(self):

@@ -18,9 +18,9 @@ class CodeTest(unittest.TestCase):
                 OpConstant, 
                 [65534], 
                 [
-                    bytes(OpConstant), 
-                    (255).to_bytes(1, byteorder='big'), 
-                    (254).to_bytes(1, byteorder='big')
+                    OpConstant, 
+                    255, 
+                    254
                 ]
             ),
         ]
@@ -33,11 +33,10 @@ class CodeTest(unittest.TestCase):
                     msg=f'wrong byte at position {i}. want={t[2][i]}, got={instruction[i]}')
     
     def test_instructions_string(self):
-        ins = Instructions([Make(OpConstant, 1), Make(OpConstant, 2), Make(OpConstant, 65535)])
-        expected = '''0000 OpConstant 1\n0003 OpConstant 32\n0006 OpConstant 65535\n'''
+        ins = Instructions(Make(OpConstant, 1) + Make(OpConstant, 2) + Make(OpConstant, 65535))
+        expected = '''0000 OpConstant 1\n0003 OpConstant 2\n0006 OpConstant 65535\n'''
         concatted = Instructions()
-        for i in ins.instructions:
-            concatted.instructions.extend(i)
+        concatted.instructions = ins.instructions
         self.assertEqual(str(concatted), expected,
             msg=f'instruction wrongly formatted.\nwant=\n{expected}\ngot=\n{str(concatted)}')
 
@@ -46,13 +45,13 @@ class CodeTest(unittest.TestCase):
         tests = [test_struct(OpConstant, [65535], 2)]
         for t in tests:
             instruction = Make(t.op, *t.operands)
-            defn, err = lookup(bytes(t.op))
+            defn, err = lookup(t.op)
             self.assertIsNotNone(defn, msg=f'definition not found: {err}\n')
             operands_read, n = read_operands(defn, instruction[1:])
             self.assertEqual(n, t.bytesread, msg=f'n wrong. want={t.bytesread}, got={n}')
             for i, want in enumerate(t.operands):
-                self.assertEqual(operands_read[i], want,
-                    msg=f'operand wrong. want={want}, got={operands_read[i]}')
+                self.assertEqual(int.from_bytes(operands_read[i:], byteorder='big'), want,
+                    msg=f'operand wrong. want={want}, got={operands_read}')
    
 if __name__ == '__main__':
     unittest.main()

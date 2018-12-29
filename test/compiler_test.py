@@ -3,11 +3,9 @@ from collections import namedtuple
 from typing import Any
 import sys
 sys.path.append("../src/")
-from monkey.tokens import token
 from monkey.lexer import lexer
 from monkey.ast import ast
 from monkey.parser import parser
-from monkey.evaluator import evaluator as e
 from monkey.object import *
 from monkey.code import *
 from monkey.compiler import compiler as c
@@ -35,19 +33,11 @@ class CompilerTest(unittest.TestCase):
             self.assertIsNone(err, msg=f'check_constants failed: {err}')
 
     def check_instructions(self, expected, actual):
-        concatted = self.concat_instructions(expected)
-        self.assertEqual(len(actual), len(concatted.instructions), 
-            msg=f'wrong instruction length.\nwant=\n{str(concatted)}\ngot=\n{str(actual)}')
-        for i, ins in enumerate(concatted.instructions):
-            self.assertEqual(actual[i], concatted.instructions[i], 
-                msg=f'wrong instruction at {i}\nwant=\n{concatted.instructions[i]}\ngot={actual[i]}')
+        self.assertEqual(len(actual), len(expected), 
+            msg=f'wrong instruction length.\nwant=\n{str(expected)}\ngot=\n{actual}')
+        self.assertEqual(actual, expected, 
+                msg=f'wrong instruction \nwant=\n{expected}\ngot={actual}')
         return None
-    
-    def concat_instructions(self, instructions):
-        out = Instructions()
-        for ins in instructions:
-            out.instructions.extend(ins)
-        return out
     
     def check_constants(self, expected, actual):
         self.assertEqual(len(expected), len(actual),
