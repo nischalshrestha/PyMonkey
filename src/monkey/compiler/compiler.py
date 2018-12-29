@@ -47,7 +47,7 @@ class Compiler:
         pos = self.add_instruction(ins)
         return pos
 
-    def add_instruction(self, *ins):
+    def add_instruction(self, ins):
         pos_new_instruction = len(self.instructions)
         self.instructions += ins
         return pos_new_instruction
@@ -60,4 +60,4 @@ class Bytecode(NamedTuple):
     constants: List[Object]
 
 def new():
-    return Compiler([], [])
+    return Compiler(bytearray(), [])

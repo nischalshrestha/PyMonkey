@@ -37,6 +37,7 @@ class VM:
     def push(self, o):
         if self.sp >= STACK_SIZE:
             return "stack overflow"
+        # print('pushing into stack object ', o)
         self.stack[self.sp] = o
         self.sp += 1
         return None

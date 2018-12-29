@@ -91,7 +91,7 @@ def lookup(op):
 
 def Make(op, *operands):
     """
-    Creates and returns a bytecode instruction as a list [OpCode, Operand...]
+    Creates and returns a bytecode instruction as a bytearray (OpCode + Operand...)
     """
     if op not in definitions:
         return [bytes()]
@@ -126,6 +126,12 @@ def byte_size(integer):
     """
     byte_s = math.ceil(integer.bit_length() / 8)
     return 2 if byte_s < 2 else byte_s
+
+def bytes_to_int(ins):
+    concatted = ins[0]
+    for i in ins:
+        concatted += i
+    return concatted
 
 def read_operands(defn, ins):
     total_width = len(defn.operand_widths)
