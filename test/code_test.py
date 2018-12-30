@@ -52,6 +52,19 @@ class CodeTest(unittest.TestCase):
             for i, want in enumerate(t.operands):
                 self.assertEqual(int.from_bytes(operands_read[i:], byteorder='big'), want,
                     msg=f'operand wrong. want={want}, got={operands_read}')
+    
+    def test_make(self):
+        test_struct = namedtuple('test_struct', ['op', 'operands', 'expected'])
+        tests = [
+            test_struct(OpAdd, [], [OpAdd])
+        ]
+        for t in tests:
+            instruction = Make(t.op, t.operands)
+            self.assertEqual(len(instruction), len(t.expected), 
+                msg=f'instruction has wrong length. want={len(t.expected)}, got={len(instruction)}')
+            for i, b in enumerate(t.expected):
+                self.assertEqual(instruction[i], t.expected[i],
+                    msg=f'wrong byte at position {i}. want={t.expected[i]}, got={instruction[i]}')
    
 if __name__ == '__main__':
     unittest.main()

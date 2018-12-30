@@ -73,6 +73,7 @@ class ByteEnum(Enum):
 
 class OpCodes(ByteEnum):
     OpConstant = auto()
+    OpAdd = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -82,6 +83,7 @@ class Definition(NamedTuple):
 # testing purposes
 definitions = {
     OpConstant : Definition("OpConstant", [2]), # operand_widths is two bytes
+    OpAdd : Definition("OpAdd", [])
 }
 
 def lookup(op):
@@ -99,17 +101,18 @@ def Make(op, *operands):
     instruction_len = 1 # opcode counts
     for w in defn.operand_widths:
         instruction_len += w
-    # instruction byte size is opcode plus operand_widths
-    instruction = bytearray(1 + defn.operand_widths[0])
+    # instruction byte size is opcode plus operand_widths (if any operands)
+    instruction = bytearray(instruction_len)
     instruction[0] = op
-    offset = 1
-    # We can do almost all string operators with bytes w. exceptions:
-    # https://docs.python.org/3.3/library/stdtypes.html#bytes-methods
-    for i, o in enumerate(operands):
-        width = defn.operand_widths[i]
-        if width == 2:
-            instruction[offset:] = put_int_16(instruction[offset:], c_uint16(o).value)
-        offset += width
+    if instruction_len > 1:
+        offset = 1
+        # We can do almost all string operators with bytes w. exceptions:
+        # https://docs.python.org/3.3/library/stdtypes.html#bytes-methods
+        for i, o in enumerate(operands):
+            width = defn.operand_widths[i]
+            if width == 2:
+                instruction[offset:] = put_int_16(instruction[offset:], c_uint16(o).value)
+            offset += width
     return instruction
 
 def put_int_16(array, unint16):
