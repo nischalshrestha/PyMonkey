@@ -19,7 +19,7 @@ class VMTest(unittest.TestCase):
         tests = [
             VmTestCase("1", 1),
             VmTestCase("2", 2),
-            VmTestCase("1 + 2", 3), # TODO fix this
+            VmTestCase("1 + 2", 3),
         ]
         self.run_vm_tests(tests)
     

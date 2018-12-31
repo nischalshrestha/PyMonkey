@@ -2,6 +2,8 @@ from monkey import lexer
 from monkey.object import environment
 from monkey import parser
 from monkey import evaluator
+from monkey import compiler
+from monkey import vm
 from monkey.evaluator import macro_expansion
 import keyboard
 
@@ -35,11 +37,22 @@ def start():
         if len(p.errors) != 0:
             print_parse_errors(p.errors)
         else:
-            macro_expansion.DefineMacros(program, macro_env)
-            expanded = macro_expansion.ExpandMacros(program, macro_env)
-            evaluated = evaluator.Eval(expanded, env)
-            if evaluated != None:
-                print(evaluated.inspect(), '\n')
+            comp = compiler.new()
+            err = comp.compile(program)
+            if err != None:
+                print(f'Woops! Compilation failed:\n{err}\n')
+            machine = vm.new(comp.bytecode())
+            err = machine.run()
+            if err != None:
+                print(f'Woops! Executing bytecode failed:\n{err}\n')
+            stack_top = machine.stack_top()
+            print(stack_top.inspect(), '\n')
+            # TODO allow a compilation or evaluation option
+            # macro_expansion.DefineMacros(program, macro_env)
+            # expanded = macro_expansion.ExpandMacros(program, macro_env)
+            # evaluated = evaluator.Eval(expanded, env)
+            # if evaluated != None:
+            #     print(evaluated.inspect(), '\n')
                 
 def print_parse_errors(errors):
     print(MONKEY_FACE)
@@ -47,4 +60,3 @@ def print_parse_errors(errors):
     print('parser errors:\n')
     for msg in errors:
         print("\t", msg, "\n")
-
