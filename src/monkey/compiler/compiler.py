@@ -33,6 +33,11 @@ class Compiler:
             err = self.compile(node.right)
             if err != None:
                 return err
+            if node.operator == '+':
+                self.emit(code.OpAdd)
+            else:
+                return (f'unknown operator {node.operator}')
+            
         elif isinstance(node, IntegerLiteral):
             integer = Integer(value=node.value)
             self.emit(code.OpConstant, self.add_constant(integer))

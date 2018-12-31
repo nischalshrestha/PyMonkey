@@ -24,23 +24,40 @@ class VM:
         return None if self.sp == 0 else self.stack[self.sp - 1]
     
     def run(self):
-        for ip in range(len(self.instructions)):
+        ip = 0
+        while ip <= code.bytes_to_int(self.instructions):
             op = self.instructions[ip]
             if op == code.OpConstant:
-                const_index = code.bytes_to_int(self.instructions[ip+1:])
-                ip += 2
+                # because we are using bytearray we will need to specify
+                # the end range of the instructions bytearray so we don't
+                # overshoot the operand and accidentally read next opcode
+                const_index = code.bytes_to_int(self.instructions[ip+1:ip+3])
+                # move ip up to next OpCode
+                ip += 3
                 err = self.push(self.constants[const_index])
                 if err != None:
                     return err
+            if op == code.OpAdd:
+                right = self.pop()
+                left = self.pop()
+                left_value = left.value
+                right_value = right.value
+                result = left_value + right_value
+                self.push(object.Integer(value=result))
+                ip += 1
         return None
     
     def push(self, o):
         if self.sp >= STACK_SIZE:
             return "stack overflow"
-        # print('pushing into stack object ', o)
         self.stack[self.sp] = o
         self.sp += 1
         return None
+
+    def pop(self):
+        o = self.stack[self.sp-1]
+        self.sp -= 1
+        return o
 
 def new(bytecode):
     return VM(

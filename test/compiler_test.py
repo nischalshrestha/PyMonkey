@@ -16,7 +16,8 @@ class CompilerTest(unittest.TestCase):
 
     def test_integer_arithmetic(self):
         tests = [
-            CompilerTestCase("1 + 2", [1, 2], Make(OpConstant, 0) + Make(OpConstant, 1))
+            # CompilerTestCase("1 + 2", [1, 2], Make(OpConstant, 0) + Make(OpConstant, 1))
+            CompilerTestCase("1 + 2", [1, 2], Make(OpConstant, 0) + Make(OpConstant, 1) + Make(OpAdd))
         ]
         self.run_compiler_tests(tests)
 
