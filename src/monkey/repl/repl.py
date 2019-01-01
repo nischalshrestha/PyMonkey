@@ -41,10 +41,12 @@ def start():
             err = comp.compile(program)
             if err != None:
                 print(f'Woops! Compilation failed:\n{err}\n')
+                continue
             machine = vm.new(comp.bytecode())
             err = machine.run()
             if err != None:
                 print(f'Woops! Executing bytecode failed:\n{err}\n')
+                continue
             last_popped = machine.last_popped_stack_element()
             print(last_popped.inspect(), '\n')
             # TODO allow a compilation or evaluation option

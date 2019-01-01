@@ -25,7 +25,7 @@ class VM:
     
     def run(self):
         ip = 0
-        while ip < code.bytes_to_int(self.instructions)-1:
+        while ip < len(self.instructions):
             op = self.instructions[ip]
             if op == code.OpConstant:
                 # because we are using bytearray we will need to specify
