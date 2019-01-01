@@ -26,6 +26,7 @@ class Compiler:
             err = self.compile(node.expression)
             if err != None:
                 return err
+            self.emit(code.OpPop)
         elif isinstance(node, InfixExpression):
             err = self.compile(node.left)
             if err != None:
@@ -37,7 +38,6 @@ class Compiler:
                 self.emit(code.OpAdd)
             else:
                 return (f'unknown operator {node.operator}')
-            
         elif isinstance(node, IntegerLiteral):
             integer = Integer(value=node.value)
             self.emit(code.OpConstant, self.add_constant(integer))

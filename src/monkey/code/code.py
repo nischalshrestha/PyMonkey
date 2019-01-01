@@ -74,6 +74,7 @@ class ByteEnum(Enum):
 class OpCodes(ByteEnum):
     OpConstant = auto()
     OpAdd = auto()
+    OpPop = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -83,7 +84,8 @@ class Definition(NamedTuple):
 # testing purposes
 definitions = {
     OpConstant : Definition("OpConstant", [2]), # operand_widths is two bytes
-    OpAdd : Definition("OpAdd", [])
+    OpAdd : Definition("OpAdd", []),
+    OpPop : Definition("OpPop", [])
 }
 
 def lookup(op):
