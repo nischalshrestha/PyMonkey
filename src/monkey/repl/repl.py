@@ -45,8 +45,8 @@ def start():
             err = machine.run()
             if err != None:
                 print(f'Woops! Executing bytecode failed:\n{err}\n')
-            stack_top = machine.stack_top()
-            print(stack_top.inspect(), '\n')
+            last_popped = machine.last_popped_stack_element()
+            print(last_popped.inspect(), '\n')
             # TODO allow a compilation or evaluation option
             # macro_expansion.DefineMacros(program, macro_env)
             # expanded = macro_expansion.ExpandMacros(program, macro_env)

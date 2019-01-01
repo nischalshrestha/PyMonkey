@@ -32,7 +32,7 @@ class VMTest(unittest.TestCase):
             vm = v.new(comp.bytecode())
             err = vm.run()
             self.assertIsNone(err, msg=f'vm error: {err}')
-            stack_element = vm.stack_top()
+            stack_element = vm.last_popped_stack_element()
             self.check_expected_object(t.expected, stack_element)
 
     def check_expected_object(self, expected, actual):

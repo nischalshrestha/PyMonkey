@@ -25,7 +25,7 @@ class VM:
     
     def run(self):
         ip = 0
-        while ip <= code.bytes_to_int(self.instructions):
+        while ip < code.bytes_to_int(self.instructions)-1:
             op = self.instructions[ip]
             if op == code.OpConstant:
                 # because we are using bytearray we will need to specify
@@ -37,13 +37,16 @@ class VM:
                 err = self.push(self.constants[const_index])
                 if err != None:
                     return err
-            if op == code.OpAdd:
+            elif op == code.OpAdd:
                 right = self.pop()
                 left = self.pop()
                 left_value = left.value
                 right_value = right.value
                 result = left_value + right_value
                 self.push(object.Integer(value=result))
+                ip += 1
+            elif op == code.OpPop:
+                self.pop()
                 ip += 1
         return None
     
@@ -58,6 +61,9 @@ class VM:
         o = self.stack[self.sp-1]
         self.sp -= 1
         return o
+    
+    def last_popped_stack_element(self):
+        return self.stack[self.sp]
 
 def new(bytecode):
     return VM(
