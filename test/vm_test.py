@@ -20,6 +20,15 @@ class VMTest(unittest.TestCase):
             VmTestCase("1", 1),
             VmTestCase("2", 2),
             VmTestCase("1 + 2", 3),
+            VmTestCase(" 1 - 2", -1), 
+            VmTestCase(" 1 * 2", 2), 
+            VmTestCase(" 4 / 2", 2), 
+            VmTestCase(" 50 / 2 * 2 + 10 - 5", 55), 
+            VmTestCase(" 5 + 5 + 5 + 5 - 10", 10), 
+            VmTestCase(" 2 * 2 * 2 * 2 * 2", 32), 
+            VmTestCase(" 5 * 2 + 10", 20), 
+            VmTestCase(" 5 + 2 * 10", 25), 
+            VmTestCase(" 5 * (2 + 10)", 60),
         ]
         self.run_vm_tests(tests)
     

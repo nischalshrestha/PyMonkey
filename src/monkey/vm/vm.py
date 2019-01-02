@@ -37,18 +37,40 @@ class VM:
                 err = self.push(self.constants[const_index])
                 if err != None:
                     return err
-            elif op == code.OpAdd:
-                right = self.pop()
-                left = self.pop()
-                left_value = left.value
-                right_value = right.value
-                result = left_value + right_value
-                self.push(object.Integer(value=result))
+            elif op == code.OpAdd or op == code.OpSub or op == code.OpMul or op == code.OpDiv:
+                err = self.execute_binary_operation(op)
+                if err != None:
+                    return err
                 ip += 1
             elif op == code.OpPop:
                 self.pop()
                 ip += 1
         return None
+
+    def execute_binary_operation(self, op):
+        right = self.pop()
+        left = self.pop()
+        left_type = left.object_type()
+        right_type = right.object_type()
+        if left_type == object.INTEGER_OBJ and right_type == object.INTEGER_OBJ:
+            return self.execute_binary_integer_operation(op, left, right)
+        return f'unsupported types for binary operation: {left_type} {right_type}'
+
+    def execute_binary_integer_operation(self, op, left, right):
+        left_value = left.value
+        right_value = right.value
+        result = 0
+        if op == code.OpAdd:
+            result = left_value + right_value
+        elif op == code.OpSub:
+            result = left_value - right_value
+        elif op == code.OpMul:
+            result = left_value * right_value
+        elif op == code.OpDiv:
+            result = left_value / right_value
+        else:
+            return f'unknown integer operator {op}'
+        self.push(object.Integer(value=result))
     
     def push(self, o):
         if self.sp >= STACK_SIZE:

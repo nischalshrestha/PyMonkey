@@ -44,10 +44,10 @@ class Instructions:
         # differently for bytearray compared to lists
         length = len([int.from_bytes(operands, byteorder='big')])
         if length != operand_count:
-            return (f'ERROR: operand len {len(operands)} does not match defined {operand_count}\n')
+            return f'ERROR: operand len {len(operands)} does not match defined {operand_count}\n'
         if operand_count == 1:
-            return (f'{defn.name} {operand}')
-        return (f'ERROR: unhandled operand_count for {operand_count}\n')
+            return f'{defn.name} {operand}'
+        return f'ERROR: unhandled operand_count for {operand_count}\n'
 
 OpCode = NewType('OpCode', bytes)
 

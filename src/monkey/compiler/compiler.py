@@ -43,7 +43,7 @@ class Compiler:
             elif node.operator == '/':
                 self.emit(code.OpDiv)
             else:
-                return (f'unknown operator {node.operator}')
+                return f'unknown operator {node.operator}'
         elif isinstance(node, IntegerLiteral):
             integer = Integer(value=node.value)
             self.emit(code.OpConstant, self.add_constant(integer))
