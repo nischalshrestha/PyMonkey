@@ -75,6 +75,9 @@ class OpCodes(ByteEnum):
     OpConstant = auto()
     OpAdd = auto()
     OpPop = auto()
+    OpSub = auto()
+    OpMul = auto()
+    OpDiv = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -85,7 +88,10 @@ class Definition(NamedTuple):
 definitions = {
     OpConstant : Definition("OpConstant", [2]), # operand_widths is two bytes
     OpAdd : Definition("OpAdd", []),
-    OpPop : Definition("OpPop", [])
+    OpPop : Definition("OpPop", []),
+    OpSub : Definition("OpSub", []),
+    OpMul : Definition("OpMul", []),
+    OpDiv : Definition("OpDiv", []),
 }
 
 def lookup(op):

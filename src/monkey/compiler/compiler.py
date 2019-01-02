@@ -36,6 +36,12 @@ class Compiler:
                 return err
             if node.operator == '+':
                 self.emit(code.OpAdd)
+            elif node.operator == '-':
+                self.emit(code.OpSub)
+            elif node.operator == '*':
+                self.emit(code.OpMul)
+            elif node.operator == '/':
+                self.emit(code.OpDiv)
             else:
                 return (f'unknown operator {node.operator}')
         elif isinstance(node, IntegerLiteral):

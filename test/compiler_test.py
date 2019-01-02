@@ -21,10 +21,25 @@ class CompilerTest(unittest.TestCase):
                 Make(OpConstant, 1) +
                 Make(OpAdd) +
                 Make(OpPop)),
-            CompilerTestCase("1; 2", [1, 2], 
+            CompilerTestCase("1; 2;", [1, 2], 
                 Make(OpConstant, 0) + 
                 Make(OpPop) +
                 Make(OpConstant, 1) +
+                Make(OpPop)),
+            CompilerTestCase("1 - 2", [1, 2], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpSub) +
+                Make(OpPop)),
+            CompilerTestCase("1 * 2", [1, 2], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpMul) +
+                Make(OpPop)),
+            CompilerTestCase("2 / 1", [2, 1], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpDiv) +
                 Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
@@ -50,7 +65,7 @@ class CompilerTest(unittest.TestCase):
     
     def check_constants(self, expected, actual):
         self.assertEqual(len(expected), len(actual),
-            msg=f'wrong number of constatnts.\nwant=\n{len(actual)}\ngot={len(expected)}')
+            msg=f'wrong number of constants.\nwant=\n{len(actual)}\ngot={len(expected)}')
         for i, constant in enumerate(expected):
             if isinstance(constant, int):
                 err = self.check_integer_object(constant, actual[i])
