@@ -43,6 +43,17 @@ class CompilerTest(unittest.TestCase):
                 Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
+    
+    def test_boolean_expressions(self):
+        tests = [
+            CompilerTestCase("true", [], 
+                Make(OpTrue) +
+                Make(OpPop)),
+            CompilerTestCase("false", [], 
+                Make(OpFalse) +
+                Make(OpPop))
+        ]
+        self.run_compiler_tests(tests)
 
     def run_compiler_tests(self, tests):
         for t in tests:

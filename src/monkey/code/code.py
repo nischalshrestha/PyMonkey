@@ -78,6 +78,8 @@ class OpCodes(ByteEnum):
     OpSub = auto()
     OpMul = auto()
     OpDiv = auto()
+    OpTrue = auto()
+    OpFalse = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -92,6 +94,8 @@ definitions = {
     OpSub : Definition("OpSub", []),
     OpMul : Definition("OpMul", []),
     OpDiv : Definition("OpDiv", []),
+    OpTrue : Definition("OpTrue", []),
+    OpFalse : Definition("OpFalse", []),
 }
 
 def lookup(op):

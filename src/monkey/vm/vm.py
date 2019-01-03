@@ -6,6 +6,8 @@ from monkey import object
 from monkey.common import utilities
 
 STACK_SIZE = 2048
+TRUE = object.Boolean(True)
+FALSE = object.Boolean(False)
 
 class VM:
 
@@ -39,6 +41,16 @@ class VM:
                     return err
             elif op == code.OpAdd or op == code.OpSub or op == code.OpMul or op == code.OpDiv:
                 err = self.execute_binary_operation(op)
+                if err != None:
+                    return err
+                ip += 1
+            elif op == code.OpTrue:
+                err = self.push(TRUE)
+                if err != None:
+                    return err
+                ip += 1
+            elif op == code.OpFalse:
+                err = self.push(FALSE)
                 if err != None:
                     return err
                 ip += 1

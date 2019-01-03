@@ -3,7 +3,7 @@ sys.path.append("../../")
 from typing import NamedTuple
 from typing import List
 
-from monkey.ast import *
+from monkey.ast import ast
 from monkey.object import *
 from monkey.code import code
 
@@ -17,17 +17,17 @@ class Compiler:
         self.constants = constants
 
     def compile(self, node):
-        if isinstance(node, Program):
+        if isinstance(node, ast.Program):
             for s in node.statements:
                 err = self.compile(s)
                 if err != None:
                     return err
-        elif isinstance(node, ExpressionStatement):
+        elif isinstance(node, ast.ExpressionStatement):
             err = self.compile(node.expression)
             if err != None:
                 return err
             self.emit(code.OpPop)
-        elif isinstance(node, InfixExpression):
+        elif isinstance(node, ast.InfixExpression):
             err = self.compile(node.left)
             if err != None:
                 return err
@@ -44,9 +44,14 @@ class Compiler:
                 self.emit(code.OpDiv)
             else:
                 return f'unknown operator {node.operator}'
-        elif isinstance(node, IntegerLiteral):
+        elif isinstance(node, ast.IntegerLiteral):
             integer = Integer(value=node.value)
             self.emit(code.OpConstant, self.add_constant(integer))
+        elif isinstance(node, ast.Boolean):
+            if node.value:
+                self.emit(code.OpTrue)
+            else:
+                self.emit(code.OpFalse)
         return None
 
     def add_constant(self, obj):
