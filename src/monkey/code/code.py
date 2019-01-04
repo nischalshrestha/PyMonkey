@@ -16,6 +16,8 @@ from monkey.common import utilities
 
 class Instructions:
 
+    # instructions are represented as bytearray as they behave like lists
+    # and are amenable to most string operations like indexing
     instructions: bytearray = None
 
     def __init__(self, instructions=None):
@@ -23,6 +25,15 @@ class Instructions:
             self.instructions = instructions
 
     def __str__(self):
+        """
+        Prints a nicely-formatted string version of the instruction like so:
+
+        <offset> <OpCode> <Operand>
+
+        where offset is which index the instruction starts in the total bytecode,
+        OpCode is the name of the instruciton and the operand is the bytecode for
+        the operands.
+        """
         out = ''
         i = 0
         ins = self.instructions
@@ -38,6 +49,10 @@ class Instructions:
         return out
     
     def string_instruction(self, defn, operands):
+        """
+        Returns a formatted string representing the <OpCode> <Operand> or an 
+        error message.
+        """
         operand_count = len(defn.operand_widths)
         operand = c_uint16(int.from_bytes(operands, byteorder='big')).value
         # For now, this is a hack to check operand length since len() works
@@ -49,8 +64,6 @@ class Instructions:
             return f'{defn.name} {operand}'
         return f'ERROR: unhandled operand_count for {operand_count}\n'
 
-OpCode = NewType('OpCode', bytes)
-
 class ByteEnum(Enum):
     """
     This class is the same as Enum except it stores the OpCodes
@@ -58,8 +71,8 @@ class ByteEnum(Enum):
     """
     def _generate_next_value_(name, start, count, last_values):
         """
-        Stores <OpCode, Byte> into the global space such that each OpCode
-        has a corresponding unique bytes value.
+        Stores <OpCode, Integer> into the global space such that each OpCode
+        has a corresponding unique int value.
         """
         for last_value in reversed(last_values):
             try:
@@ -80,15 +93,19 @@ class OpCodes(ByteEnum):
     OpDiv = auto()
     OpTrue = auto()
     OpFalse = auto()
+    OpEqual = auto()
+    OpNotEqual = auto()
+    OpGreaterThan = auto()
 
 class Definition(NamedTuple):
     name: str
-    operand_widths: List[bytes]
+    # this represents a list of operands defined by an int indicating how many
+    # bytes each one should be; for e.g. [2] means 1 operand that is 2 bytes
+    operand_widths: List[int]
 
-# This is just to be transparent about what the OpCodes do and for debugging or
-# testing purposes
+# Holds the Definitions for all the OpCodes in Monkey
 definitions = {
-    OpConstant : Definition("OpConstant", [2]), # operand_widths is two bytes
+    OpConstant : Definition("OpConstant", [2]),
     OpAdd : Definition("OpAdd", []),
     OpPop : Definition("OpPop", []),
     OpSub : Definition("OpSub", []),
@@ -96,9 +113,17 @@ definitions = {
     OpDiv : Definition("OpDiv", []),
     OpTrue : Definition("OpTrue", []),
     OpFalse : Definition("OpFalse", []),
+    OpEqual : Definition("OpEqual", []),
+    OpNotEqual : Definition("OpNotEqual", []),
+    OpGreaterThan : Definition("OpGreaterThan", []),
 }
 
 def lookup(op):
+    """
+    Looks up the OpCode represented as an int in the definitions dictionary.
+    If found, returns the Definition and a None
+    Else, it returns a None and an error message
+    """
     if op not in definitions:
         return None, f'opcode {op} undefined'
     return definitions[op], None
@@ -143,12 +168,21 @@ def byte_size(integer):
     return 2 if byte_s < 2 else byte_s
 
 def bytes_to_int(ins):
+    """
+    Converts bytes representing an integer to an integer
+    """
     concatted = ins[0]
-    for i in ins:
-        concatted += i
+    i = 1
+    while i < len(ins):
+        concatted += ins[i]
     return concatted
 
 def read_operands(defn, ins):
+    """
+    Given the Definition of the instruction, and the instruction itself,
+    this function reads operands portion of the instruction bytecode and 
+    returns them along with the updated offset into the instruction.
+    """
     total_width = len(defn.operand_widths)
     operands = bytearray(len(defn.operand_widths))
     offset = 0

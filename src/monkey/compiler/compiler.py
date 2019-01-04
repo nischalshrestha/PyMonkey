@@ -1,3 +1,7 @@
+"""
+Monkey Compiler and Bytecode class definitions
+"""
+
 import sys
 sys.path.append("../../")
 from typing import NamedTuple
@@ -17,6 +21,9 @@ class Compiler:
         self.constants = constants
 
     def compile(self, node):
+        """
+        Walks the given AST and emits bytecode for the vm to execute
+        """
         if isinstance(node, ast.Program):
             for s in node.statements:
                 err = self.compile(s)
@@ -55,20 +62,33 @@ class Compiler:
         return None
 
     def add_constant(self, obj):
+        """
+        Add a given Object to the constant pool, currently just Integer(s)
+        """
         self.constants.append(obj)
         return len(self.constants) - 1
     
     def emit(self, op, *operands):
+        """
+        Generate code for the given instruction based on opcode and operands
+        """
         ins = code.Make(op, *operands)
         pos = self.add_instruction(ins)
         return pos
 
     def add_instruction(self, ins):
+        """
+        Add an instruction and return its position in the instructions bytearray
+        """
         pos_new_instruction = len(self.instructions)
         self.instructions += ins
         return pos_new_instruction
     
     def bytecode(self):
+        """
+        Return a bytecode representation of all instructions and the constant
+        pool.
+        """
         return Bytecode(self.instructions, self.constants)
 
 class Bytecode(NamedTuple):
