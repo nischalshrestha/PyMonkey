@@ -96,6 +96,8 @@ class OpCodes(ByteEnum):
     OpEqual = auto()
     OpNotEqual = auto()
     OpGreaterThan = auto()
+    OpMinus = auto()
+    OpBang = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -116,6 +118,8 @@ definitions = {
     OpEqual : Definition("OpEqual", []),
     OpNotEqual : Definition("OpNotEqual", []),
     OpGreaterThan : Definition("OpGreaterThan", []),
+    OpMinus : Definition("OpMinus", []),
+    OpBang : Definition("OpBang", []),
 }
 
 def lookup(op):

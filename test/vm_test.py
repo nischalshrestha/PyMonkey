@@ -29,13 +29,10 @@ class VMTest(unittest.TestCase):
             VmTestCase("5 * 2 + 10", 20), 
             VmTestCase("5 + 2 * 10", 25), 
             VmTestCase("5 * (2 + 10)", 60),
-        ]
-        self.run_vm_tests(tests)
-    
-    def test_integer_arithmetic(self):
-        tests = [
-            VmTestCase("true", True),
-            VmTestCase("false", False),
+            VmTestCase("-5", -5), 
+            VmTestCase("-10", -10),
+            VmTestCase("-50 + 100 + -50", 0), 
+            VmTestCase("( 5 + 10 * 2 + 15 / 3) * 2 + -10", 50),
         ]
         self.run_vm_tests(tests)
     
@@ -58,6 +55,12 @@ class VMTest(unittest.TestCase):
             VmTestCase("(1 < 2) == false", False), 
             VmTestCase("(1 > 2) == true", False), 
             VmTestCase("(1 > 2) == false", True),
+            VmTestCase("!true", False), 
+            VmTestCase("!false", True), 
+            VmTestCase("!5", False), 
+            VmTestCase("!!true", True), 
+            VmTestCase("!!false", False), 
+            VmTestCase("!!5", True),
         ]
         self.run_vm_tests(tests)
     

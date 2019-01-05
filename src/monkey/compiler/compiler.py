@@ -34,6 +34,16 @@ class Compiler:
             if err != None:
                 return err
             self.emit(code.OpPop)
+        elif isinstance(node, ast.PrefixExpression):
+            err = self.compile(node.right)
+            if err != None:
+                return err
+            if node.operator == '!':
+                self.emit(code.OpBang)
+            elif node.operator == '-':
+                self.emit(code.OpMinus)
+            else:
+                return f'unknown operator {node.operator}'
         elif isinstance(node, ast.InfixExpression):
             # treat < as a special case by compiling right operand
             # before the left operand and simply work with OpGreaterThan

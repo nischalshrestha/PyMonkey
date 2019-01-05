@@ -71,6 +71,10 @@ class CompilerTest(unittest.TestCase):
                 Make(OpFalse) +
                 Make(OpNotEqual) +
                 Make(OpPop)),
+            CompilerTestCase("-1", [1], 
+                Make(OpConstant, 0) +
+                Make(OpMinus) +
+                Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
     
@@ -81,7 +85,11 @@ class CompilerTest(unittest.TestCase):
                 Make(OpPop)),
             CompilerTestCase("false", [], 
                 Make(OpFalse) +
-                Make(OpPop))
+                Make(OpPop)),
+            CompilerTestCase("!true", [], 
+                Make(OpTrue) +
+                Make(OpBang) +
+                Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
 

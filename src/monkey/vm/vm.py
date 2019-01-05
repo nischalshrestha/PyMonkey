@@ -61,6 +61,16 @@ class VM:
                 if err != None:
                     return err
                 ip += 1
+            elif op == code.OpBang:
+                err = self.execute_bang_operator()
+                if err != None:
+                    return err
+                ip += 1
+            elif op == code.OpMinus:
+                err = self.execute_minus_operator()
+                if err != None:
+                    return err
+                ip += 1
             elif op == code.OpTrue:
                 err = self.push(TRUE)
                 if err != None:
@@ -139,11 +149,26 @@ class VM:
         elif op == code.OpGreaterThan:
             return self.push(self.native_bool_to_boolean_object(left_value > right_value))
         else:
-            return f'unknown operator {op} ({left_type} {right_type})'
+            return f'unknown operator {op}'
     
     def native_bool_to_boolean_object(self, boolean):
         """Convert Python boolean to Boolean Object."""
         return TRUE if boolean else FALSE
+
+    def execute_bang_operator(self):
+        operand = self.pop()
+        if operand.value == True:
+            return self.push(FALSE)
+        elif operand.value == False:
+            return self.push(TRUE)
+        else:
+            return self.push(FALSE)
+    
+    def execute_minus_operator(self):
+        operand = self.pop()
+        if operand.object_type() != object.INTEGER_OBJ:
+            return f'unsupported type for negation: {operand.object_type()}'
+        return self.push(object.Integer(value=-operand.value))
 
     def push(self, o):
         if self.sp >= STACK_SIZE:

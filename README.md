@@ -24,7 +24,7 @@ Python version of the [Monkey](https://interpreterbook.com/#the-monkey-programmi
 
 #### Compiler
 
-- [ ] Compile expressions
+- [x] Compile expressions
 - [ ] Conditionals
 - [ ] Data structures
 - [ ] Functions
