@@ -39,6 +39,28 @@ class VMTest(unittest.TestCase):
         ]
         self.run_vm_tests(tests)
     
+    def test_boolean_expressions(self):
+        tests = [
+            VmTestCase("1 < 2", True),
+            VmTestCase("1 > 2", False),
+            VmTestCase("1 < 1", False), 
+            VmTestCase("1 > 1", False), 
+            VmTestCase("1 == 1", True), 
+            VmTestCase("1 != 1", False), 
+            VmTestCase("1 == 2", False), 
+            VmTestCase("1 != 2", True), 
+            VmTestCase("true == true", True), 
+            VmTestCase("false == false", True), 
+            VmTestCase("true == false", False), 
+            VmTestCase("true != false", True), 
+            VmTestCase("false != true", True), 
+            VmTestCase("(1 < 2) == true", True), 
+            VmTestCase("(1 < 2) == false", False), 
+            VmTestCase("(1 > 2) == true", False), 
+            VmTestCase("(1 > 2) == false", True),
+        ]
+        self.run_vm_tests(tests)
+    
     def run_vm_tests(self, tests):
         for t in tests:
             program = self.parse(t.input)

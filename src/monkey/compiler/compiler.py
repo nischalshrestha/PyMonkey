@@ -35,6 +35,18 @@ class Compiler:
                 return err
             self.emit(code.OpPop)
         elif isinstance(node, ast.InfixExpression):
+            # treat < as a special case by compiling right operand
+            # before the left operand and simply work with OpGreaterThan
+            # for e.g. for 3 > 5 one simply needs to flip operands to 5 > 3
+            if node.operator == '<':
+                err = self.compile(node.right)
+                if err != None:
+                    return err
+                err = self.compile(node.left)
+                if err != None:
+                    return err
+                self.emit(code.OpGreaterThan)
+                return None
             err = self.compile(node.left)
             if err != None:
                 return err
@@ -49,6 +61,12 @@ class Compiler:
                 self.emit(code.OpMul)
             elif node.operator == '/':
                 self.emit(code.OpDiv)
+            elif node.operator == '>':
+                self.emit(code.OpGreaterThan)
+            elif node.operator == '==':
+                self.emit(code.OpEqual)
+            elif node.operator == '!=':
+                self.emit(code.OpNotEqual)
             else:
                 return f'unknown operator {node.operator}'
         elif isinstance(node, ast.IntegerLiteral):

@@ -41,6 +41,36 @@ class CompilerTest(unittest.TestCase):
                 Make(OpConstant, 1) +
                 Make(OpDiv) +
                 Make(OpPop)),
+            CompilerTestCase("1 > 2", [1, 2], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpGreaterThan) +
+                Make(OpPop)),
+            CompilerTestCase("1 < 2", [2, 1], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpGreaterThan) +
+                Make(OpPop)),
+            CompilerTestCase("1 == 2", [1, 2], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpEqual) +
+                Make(OpPop)),
+            CompilerTestCase("1 != 2", [1, 2], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpNotEqual) +
+                Make(OpPop)),
+            CompilerTestCase("true == false", [], 
+                Make(OpTrue) +
+                Make(OpFalse) +
+                Make(OpEqual) +
+                Make(OpPop)),
+            CompilerTestCase("true != false", [], 
+                Make(OpTrue) +
+                Make(OpFalse) +
+                Make(OpNotEqual) +
+                Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
     

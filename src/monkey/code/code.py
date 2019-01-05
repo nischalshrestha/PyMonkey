@@ -175,6 +175,7 @@ def bytes_to_int(ins):
     i = 1
     while i < len(ins):
         concatted += ins[i]
+        i += 1
     return concatted
 
 def read_operands(defn, ins):

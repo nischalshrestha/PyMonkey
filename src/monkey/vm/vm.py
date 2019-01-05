@@ -56,6 +56,11 @@ class VM:
                     return err
                 # only need to move offset by 1 as there are no operands
                 ip += 1
+            elif op == code.OpEqual or op == code.OpNotEqual or op == code.OpGreaterThan:
+                err = self.execute_comparison(op)
+                if err != None:
+                    return err
+                ip += 1
             elif op == code.OpTrue:
                 err = self.push(TRUE)
                 if err != None:
@@ -103,7 +108,43 @@ class VM:
         else:
             return f'unknown integer operator {op}'
         self.push(object.Integer(value=result))
+
+    def execute_comparison(self, op):
+        """
+        Executes comparison of integers or booleans using a compare operator
+        """
+        right = self.pop()
+        left = self.pop()
+        left_type = left.object_type()
+        right_type = right.object_type()
+        if left_type == object.INTEGER_OBJ or right_type == object.INTEGER_OBJ:
+            return self.execute_integer_comparison(op, left, right)
+        if op == code.OpEqual:
+            return self.push(self.native_bool_to_boolean_object(right == left))
+        elif op == code.OpNotEqual:
+            return self.push(self.native_bool_to_boolean_object(right != left))
+        else:
+            return f'unknown operator {op} ({left_type} {right_type})'
     
+    def execute_integer_comparison(self, op, left, right):
+        """
+        Executes integer comparison and pushes result on to the stack
+        """
+        left_value = left.value
+        right_value = right.value
+        if op == code.OpEqual:
+            return self.push(self.native_bool_to_boolean_object(right_value == left_value))
+        elif op == code.OpNotEqual:
+            return self.push(self.native_bool_to_boolean_object(right_value != left_value))
+        elif op == code.OpGreaterThan:
+            return self.push(self.native_bool_to_boolean_object(left_value > right_value))
+        else:
+            return f'unknown operator {op} ({left_type} {right_type})'
+    
+    def native_bool_to_boolean_object(self, boolean):
+        """Convert Python boolean to Boolean Object."""
+        return TRUE if boolean else FALSE
+
     def push(self, o):
         if self.sp >= STACK_SIZE:
             return "stack overflow"
