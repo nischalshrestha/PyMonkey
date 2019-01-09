@@ -92,6 +92,24 @@ class CompilerTest(unittest.TestCase):
                 Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
+    
+    def test_conditionals(self):
+        tests = [
+            CompilerTestCase("if (true) { 10 }; 3333;", [10, 3333],
+                # 0000
+                Make(OpTrue) +
+                # 0001
+                Make(OpJumpNotTruthy, 7) +
+                # 0004
+                Make(OpConstant, 0) +
+                # 0007
+                Make(OpPop) +
+                # 0008
+                Make(OpConstant, 1) +
+                # 00011
+                Make(OpPop))
+        ]
+        self.run_compiler_tests(tests)
 
     def run_compiler_tests(self, tests):
         for t in tests:

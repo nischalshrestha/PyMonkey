@@ -98,6 +98,8 @@ class OpCodes(ByteEnum):
     OpGreaterThan = auto()
     OpMinus = auto()
     OpBang = auto()
+    OpJumpNotTruthy = auto()
+    OpJump = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -120,6 +122,8 @@ definitions = {
     OpGreaterThan : Definition("OpGreaterThan", []),
     OpMinus : Definition("OpMinus", []),
     OpBang : Definition("OpBang", []),
+    OpJumpNotTruthy : Definition("OpJumpNotTruthy", [2]),
+    OpJump : Definition("OpJump", [2]),
 }
 
 def lookup(op):
