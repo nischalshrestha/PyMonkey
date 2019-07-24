@@ -14,7 +14,7 @@ Python version of the [Monkey](https://interpreterbook.com/#the-monkey-programmi
 
 ### Progress
 
-#### Interpreter
+#### Interpreter (master branch)
 
 - [x] Interpreter
 - [x] Built-in types and functions
@@ -22,7 +22,7 @@ Python version of the [Monkey](https://interpreterbook.com/#the-monkey-programmi
 #### Extras
 - [x] Macros
 
-#### Compiler
+#### Compiler (compiler branch)
 
 - [x] Compile expressions
 - [ ] Conditionals
