@@ -44,6 +44,20 @@ class Compiler:
                 self.emit(code.OpMinus)
             else:
                 return f'unknown operator {node.operator}'
+        elif isinstance(node, ast.BlockStatement):
+            for s in node.statements:
+                err = self.compile(s)
+                if err != None:
+                    return err
+        elif isinstance(node, ast.IfExpression):
+            err = self.compile(node.condition)
+            if err != None:
+                return err
+            # Emit an `OpJumpNotTruthy` with a bogus value
+            self.emit(code.OpJumpNotTruthy, 9999)
+            err = self.compile(node.consequence)
+            if err != None:
+                return  err
         elif isinstance(node, ast.InfixExpression):
             # treat < as a special case by compiling right operand
             # before the left operand and simply work with OpGreaterThan

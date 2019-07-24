@@ -125,9 +125,9 @@ class CompilerTest(unittest.TestCase):
 
     def check_instructions(self, expected, actual):
         self.assertEqual(len(actual), len(expected), 
-            msg=f'wrong instruction length.\nwant=\n{str(expected)}\ngot=\n{actual}')
+            msg=f'wrong instruction length.\nwant=\n{str(expected)}\ngot=\n{str(actual)}')
         self.assertEqual(actual, expected, 
-                msg=f'wrong instruction \nwant=\n{expected}\ngot={actual}')
+                msg=f'wrong instruction \nwant=\n{str(expected)}\ngot={str(actual)}')
         return None
     
     def check_constants(self, expected, actual):
