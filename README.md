@@ -6,6 +6,14 @@ Python version of the [Monkey](https://interpreterbook.com/#the-monkey-programmi
 
 ![alt text](https://interpreterbook.com/img/monkey_logo-d5171d15.png "Official Logo")
 
+The Monkey interpreter plus macros can be run with:
+
+`python main.py`
+
+The compiler isn't complete yet and I haven't yet decided on how to run it but I am planning on something like this:
+
+`python compile.py [Program.mnk] [args]`
+
 **NOTE:** This is a personal project created for the sole purpose of learning how to build interpreters / compilers and honing my Python skills. You may borrow code under the licence.
 
 ### Dependencies
