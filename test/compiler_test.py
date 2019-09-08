@@ -102,7 +102,7 @@ class CompilerTest(unittest.TestCase):
                 Make(OpJumpNotTruthy, 7) +
                 # 0004
                 Make(OpConstant, 0) +
-                # 0007
+                # 0007; this pop is bc ifs are expressions with an added pop at end
                 Make(OpPop) +
                 # 0008
                 Make(OpConstant, 1) +
@@ -118,13 +118,13 @@ class CompilerTest(unittest.TestCase):
             err = compiler.compile(program)
             self.assertIsNone(err, msg=f'compiler error: {err}')
             bytecode = compiler.bytecode()
-            err = self.check_instructions(t.expected_instructions, bytecode.instructions)
+            err = self.check_instructions(Instructions(t.expected_instructions), Instructions(bytecode.instructions))
             self.assertIsNone(err, msg=f'check_instructions failed: {err}')
             err = self.check_constants(t.expected_constants, bytecode.constants)
             self.assertIsNone(err, msg=f'check_constants failed: {err}')
 
     def check_instructions(self, expected, actual):
-        self.assertEqual(len(actual), len(expected), 
+        self.assertEqual(len(actual.instructions), len(expected.instructions), 
             msg=f'wrong instruction length.\nwant=\n{str(expected)}\ngot=\n{str(actual)}')
         self.assertEqual(actual, expected, 
                 msg=f'wrong instruction \nwant=\n{str(expected)}\ngot={str(actual)}')

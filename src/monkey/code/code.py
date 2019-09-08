@@ -6,7 +6,6 @@ For the sake of being explicit we define expected types with typing module
 """
 
 from typing import NamedTuple
-from typing import NewType
 from typing import List
 from enum import Enum, auto
 from ctypes import c_uint16
@@ -41,7 +40,7 @@ class Instructions:
             defn, err = lookup(ins[i])
             if err != None:
                 out += (f'ERROR: {err}\n')
-                i += 1
+                # i += 1
                 continue
             operands, read = read_operands(defn, ins[i+1:])
             out += ('{0:04d} {1}\n'.format(i, self.string_instruction(defn, operands)))     
@@ -55,13 +54,23 @@ class Instructions:
         """
         operand_count = len(defn.operand_widths)
         operand = c_uint16(int.from_bytes(operands, byteorder='big')).value
-        # For now, this is a hack to check operand length since len() works
-        # differently for bytearray compared to lists
-        length = len([int.from_bytes(operands, byteorder='big')])
+        if operand_count > 0:
+            # For now, this is a hack to check operand length since len() works
+            # differently for bytearray compared to lists
+            length = len([int.from_bytes(operands, byteorder='big')])
+        else:
+            # in the case of 0 operands, we can just take len of operands
+            length = len(operands)
+
         if length != operand_count:
-            return f'ERROR: operand len {len(operands)} does not match defined {operand_count}\n'
-        if operand_count == 1:
+            print('err', defn.name, length, operand_count)
+            return f'ERROR: operand len {length} does not match defined {operand_count}\n'
+
+        if operand_count == 0:
+            return defn.name
+        elif operand_count == 1:
             return f'{defn.name} {operand}'
+
         return f'ERROR: unhandled operand_count for {operand_count}\n'
 
 class ByteEnum(Enum):
@@ -149,7 +158,7 @@ def Make(op, *operands):
     # instruction byte size is opcode plus operand_widths (if any operands)
     instruction = bytearray(instruction_len)
     instruction[0] = op
-    if instruction_len > 1:
+    if instruction_len >= 1:
         offset = 1
         # We can do almost all string operators with bytes w. exceptions:
         # https://docs.python.org/3.3/library/stdtypes.html#bytes-methods
@@ -192,7 +201,6 @@ def read_operands(defn, ins):
     this function reads operands portion of the instruction bytecode and 
     returns them along with the updated offset into the instruction.
     """
-    total_width = len(defn.operand_widths)
     operands = bytearray(len(defn.operand_widths))
     offset = 0
     for i, width in enumerate(defn.operand_widths):
