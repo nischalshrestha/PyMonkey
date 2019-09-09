@@ -22,7 +22,7 @@ MONKEY_FACE = '''
            '-----'
 '''
 
-def start():
+def start(interpreter=True):
     # need one instance since we are persisting values
     env = environment.new_environment()
     macro_env = environment.new_environment()
@@ -37,26 +37,27 @@ def start():
         if len(p.errors) != 0:
             print_parse_errors(p.errors)
         else:
-            # TODO uncomment compiler eval when it is complete
-            comp = compiler.new()
-            err = comp.compile(program)
-            if err != None:
-                print(f'Woops! Compilation failed:\n{err}\n')
-                continue
-            machine = vm.new(comp.bytecode())
-            err = machine.run()
-            if err != None:
-                print(f'Woops! Executing bytecode failed:\n{err}\n')
-                continue
-            last_popped = machine.last_popped_stack_element()
-            print(last_popped.inspect(), '\n')
-            # Uncomment this section to use interpreter
-            # macro_expansion.DefineMacros(program, macro_env)
-            # expanded = macro_expansion.ExpandMacros(program, macro_env)
-            # evaluated = evaluator.Eval(expanded, env)
-            # if evaluated != None:
-            #     print(evaluated.inspect(), '\n')
-                
+            if interpreter:
+                macro_expansion.DefineMacros(program, macro_env)
+                expanded = macro_expansion.ExpandMacros(program, macro_env)
+                evaluated = evaluator.Eval(expanded, env)
+                if evaluated != None:
+                    print(evaluated.inspect(), '\n')
+            else:
+                # Note: Compiler is not yet completed
+                comp = compiler.new()
+                err = comp.compile(program)
+                if err != None:
+                    print(f'Woops! Compilation failed:\n{err}\n')
+                    continue
+                machine = vm.new(comp.bytecode())
+                err = machine.run()
+                if err != None:
+                    print(f'Woops! Executing bytecode failed:\n{err}\n')
+                    continue
+                last_popped = machine.last_popped_stack_element()
+                print(last_popped.inspect(), '\n')
+
 def print_parse_errors(errors):
     print(MONKEY_FACE)
     print('Woops! We ran into some monkey business here!\n')
