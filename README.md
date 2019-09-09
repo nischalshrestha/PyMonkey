@@ -10,7 +10,11 @@ The Monkey interpreter plus macros can be run with:
 
 `python main.py`
 
-The compiler isn't complete yet and I haven't yet decided on how to run it but I am planning on something like this:
+The compiler isn't complete yet but can be run with a flag `--c`:
+
+`python compile.py --c`
+
+Ultimately, to compile a Monkey file, this command will be used instead:
 
 `python compile.py [Program.mnk] [args]`
 
@@ -22,15 +26,15 @@ The compiler isn't complete yet and I haven't yet decided on how to run it but I
 
 ### Progress
 
-#### Interpreter (master branch)
+#### Interpreter
 
 - [x] Interpreter
 - [x] Built-in types and functions
 
-#### Extras (master branch)
+#### Extras
 - [x] Macros
 
-#### Compiler (compiler branch)
+#### Compiler
 
 - [x] Compile expressions
 - [ ] Conditionals
@@ -44,3 +48,5 @@ The compiler isn't complete yet and I haven't yet decided on how to run it but I
 - Default arguments to functions 
 - Macros hygiene 
 - Debugging Macros
+- Continuations
+- Time travel debugging
