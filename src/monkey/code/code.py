@@ -40,7 +40,6 @@ class Instructions:
             defn, err = lookup(ins[i])
             if err != None:
                 out += (f'ERROR: {err}\n')
-                # i += 1
                 continue
             operands, read = read_operands(defn, ins[i+1:])
             out += ('{0:04d} {1}\n'.format(i, self.string_instruction(defn, operands)))     

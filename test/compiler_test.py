@@ -126,13 +126,13 @@ class CompilerTest(unittest.TestCase):
     def check_instructions(self, expected, actual):
         self.assertEqual(len(actual.instructions), len(expected.instructions), 
             msg=f'wrong instruction length.\nwant=\n{str(expected)}\ngot=\n{str(actual)}')
-        self.assertEqual(actual, expected, 
-                msg=f'wrong instruction \nwant=\n{str(expected)}\ngot={str(actual)}')
+        self.assertEqual(actual.instructions, expected.instructions, 
+                msg=f'wrong instruction \nwant=\n{str(expected)}\ngot=\n{str(actual)}')
         return None
     
     def check_constants(self, expected, actual):
         self.assertEqual(len(expected), len(actual),
-            msg=f'wrong number of constants.\nwant=\n{len(actual)}\ngot={len(expected)}')
+            msg=f'wrong number of constants.\nwant=\n{len(actual)}\ngot=\n{len(expected)}')
         for i, constant in enumerate(expected):
             if isinstance(constant, int):
                 err = self.check_integer_object(constant, actual[i])

@@ -11,14 +11,26 @@ from monkey.ast import ast
 from monkey.object import *
 from monkey.code import code
 
+class Bytecode(NamedTuple):
+    instructions: code.Instructions
+    constants: List[Object]
+
+class EmittedInstruction(NamedTuple):
+    opcode: bytes
+    position: int
+
 class Compiler:
 
-    instructions = None
-    constants = None
+    instructions: bytearray = None
+    constants: List[Integer] = None
+    last_instruction: EmittedInstruction = None
+    previous_instruction: EmittedInstruction = None
 
-    def __init__(self, instructions, constants):
+    def __init__(self, instructions, constants, last_instruction, previous_instruction):
         self.instructions = instructions
         self.constants = constants
+        self.last_instruction = last_instruction
+        self.previous_instruction = previous_instruction
 
     def compile(self, node):
         """
@@ -54,10 +66,14 @@ class Compiler:
             if err != None:
                 return err
             # Emit an `OpJumpNotTruthy` with a bogus value
-            self.emit(code.OpJumpNotTruthy, 9999)
+            jump_not_truthy_pos = self.emit(code.OpJumpNotTruthy, 9999)
             err = self.compile(node.consequence)
             if err != None:
                 return  err
+            if self.last_instruction_is_pop():
+                self.remove_last_pop()
+            after_conseq_pos = len(self.instructions)
+            self.change_operand(jump_not_truthy_pos, after_conseq_pos)
         elif isinstance(node, ast.InfixExpression):
             # treat < as a special case by compiling right operand
             # before the left operand and simply work with OpGreaterThan
@@ -103,6 +119,13 @@ class Compiler:
                 self.emit(code.OpFalse)
         return None
 
+    def last_instruction_is_pop(self):
+        return self.last_instruction.opcode == code.OpPop
+    
+    def remove_last_pop(self):
+        self.instructions = self.instructions[:self.last_instruction.position]
+        self.last_instruction = self.previous_instruction
+
     def add_constant(self, obj):
         """
         Add a given Object to the constant pool, currently just Integer(s)
@@ -113,10 +136,39 @@ class Compiler:
     def emit(self, op, *operands):
         """
         Generate code for the given instruction based on opcode and operands
+        and returnt the position
         """
         ins = code.Make(op, *operands)
         pos = self.add_instruction(ins)
+        self.set_last_instruction(op, pos)
         return pos
+    
+    def set_last_instruction(self, op, pos):
+        """
+        Sets the last instruction given opcode and position
+        """
+        previous = self.last_instruction
+        last = EmittedInstruction(op, pos)
+        self.previous_instruction = previous
+        self.last_instruction = last
+    
+    def change_operand(self, pos, operand):
+        """
+        Changes the old operand of an instruction to a new operand
+        """
+        op = self.instructions[pos]
+        new_instruction = code.Make(op, operand)
+        self.replace_instruction(pos, new_instruction)
+    
+    def replace_instruction(self, pos, new_instruction):
+        """
+        Replaces an instruction at some position in the instructions list.
+        This is useful for setting the operand for OpJumpNotTruthy after compiling
+        consequence. 
+        Assumption: we only replace instructions of same type with same non-variable length
+        """
+        for i in range(len(new_instruction)):
+            self.instructions[pos+i] = new_instruction[i]
 
     def add_instruction(self, ins):
         """
@@ -133,9 +185,10 @@ class Compiler:
         """
         return Bytecode(self.instructions, self.constants)
 
-class Bytecode(NamedTuple):
-    instructions: code.Instructions
-    constants: List[Object]
-
 def new():
-    return Compiler(bytearray(), [])
+    return Compiler(
+        bytearray(), 
+        [], 
+        EmittedInstruction(None, 0), 
+        EmittedInstruction(None, 0)
+    )
