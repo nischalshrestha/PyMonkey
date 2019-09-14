@@ -106,7 +106,24 @@ class CompilerTest(unittest.TestCase):
                 Make(OpPop) +
                 # 0008
                 Make(OpConstant, 1) +
-                # 00011
+                # 0011
+                Make(OpPop)),
+            CompilerTestCase("if (true) { 10 } else { 20 }; 3333;", [10, 20, 3333],
+                # 0000
+                Make(OpTrue) +
+                # 0001
+                Make(OpJumpNotTruthy, 10) +
+                # 0004
+                Make(OpConstant, 0) +
+                # 0007
+                Make(OpJump, 13) +
+                # 0010
+                Make(OpConstant, 1) +
+                # 0013
+                Make(OpPop) +
+                # 0014
+                Make(OpConstant, 2) + 
+                # 0017
                 Make(OpPop))
         ]
         self.run_compiler_tests(tests)

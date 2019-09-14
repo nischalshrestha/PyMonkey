@@ -70,10 +70,30 @@ class Compiler:
             err = self.compile(node.consequence)
             if err != None:
                 return  err
+            # We get rid of an additional OpPop generated bc of the consequence
+            # expression; we want to keep the value of expression.
             if self.last_instruction_is_pop():
                 self.remove_last_pop()
-            after_conseq_pos = len(self.instructions)
-            self.change_operand(jump_not_truthy_pos, after_conseq_pos)
+            # Handle consequence if there is alternative
+            if node.alternative == None:
+                after_conseq_pos = len(self.instructions)
+                self.change_operand(jump_not_truthy_pos, after_conseq_pos)
+            else:
+                # Emit an 'OpJump' with bogus value
+                jump_pos = self.emit(code.OpJump, 9999)
+                # Make OpJumpNotTruthy jump right after OpJump
+                after_conseq_pos = len(self.instructions)
+                self.change_operand(jump_not_truthy_pos, after_conseq_pos)
+                # Compile alternative 
+                err = self.compile(node.alternative)
+                if err != None:
+                    return None
+                if self.last_instruction_is_pop():
+                    self.remove_last_pop()
+                # Patch operand of OpJump
+                after_alternative_pos = len(self.instructions)
+                self.change_operand(jump_pos, after_alternative_pos)
+
         elif isinstance(node, ast.InfixExpression):
             # treat < as a special case by compiling right operand
             # before the left operand and simply work with OpGreaterThan
