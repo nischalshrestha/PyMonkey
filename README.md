@@ -37,7 +37,7 @@ Ultimately, to compile a Monkey file, this command will be used instead:
 #### Compiler
 
 - [x] Compile expressions
-- [ ] Conditionals
+- [x] Conditionals
 - [ ] Data structures
 - [ ] Functions
 - [ ] Closures
