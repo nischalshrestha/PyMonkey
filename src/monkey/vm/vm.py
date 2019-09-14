@@ -84,7 +84,29 @@ class VM:
             elif op == code.OpPop:
                 self.pop()
                 ip += 1
+            elif op == code.OpJump:
+                # This one is just like OpConstant, need to jump to 3 places
+                pos = code.bytes_to_int(self.instructions[ip+1:ip+3])
+                # pos is the final destination, so instruction pointer should
+                # point to it
+                ip = pos
+            elif op == code.OpJumpNotTruthy:
+                # pos should be the place where we would jump to. For e.g:
+                # VmTestCase(input='if (1 > 2) { 10 } else { 20 }', expected=20)
+                # OpJumpNotTruthy ip=7 bytearray(b'\x10\x00\x01') next_ip=17 (jump to 0010)
+                pos = code.bytes_to_int(self.instructions[ip+1:ip+4])
+                ip += 3
+                # In this case we need to actually see if condition was truthy
+                condition = self.pop()
+                if not self.is_truthy(condition):
+                    # if not truthy, instruction points to right before final destination
+                    ip = pos - 1
         return None
+    
+    def is_truthy(self, obj):
+        if type(obj) == object.Boolean:
+            return obj.value
+        return True
 
     def execute_binary_operation(self, op):
         """

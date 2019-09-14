@@ -87,13 +87,12 @@ class Compiler:
                 # Compile alternative 
                 err = self.compile(node.alternative)
                 if err != None:
-                    return None
+                    return err
                 if self.last_instruction_is_pop():
                     self.remove_last_pop()
                 # Patch operand of OpJump
                 after_alternative_pos = len(self.instructions)
                 self.change_operand(jump_pos, after_alternative_pos)
-
         elif isinstance(node, ast.InfixExpression):
             # treat < as a special case by compiling right operand
             # before the left operand and simply work with OpGreaterThan

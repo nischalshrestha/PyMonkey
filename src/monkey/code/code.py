@@ -168,12 +168,15 @@ def Make(op, *operands):
             offset += width
     return instruction
 
+# def readuint(bytes):
+#     return c_uint16(bytes)
+
 def put_int_16(array, unint16):
     """
     Constructs and returns a bytearray with the appropriate bytes 
     representing an usigned int
     """
-    return bytearray((unint16).to_bytes(byte_size(unint16), byteorder='big'))
+    return bytearray((unint16).to_bytes(byte_size(unint16), byteorder='little'))
 
 def byte_size(integer):
     """
@@ -192,7 +195,7 @@ def bytes_to_int(ins):
     while i < len(ins):
         concatted += ins[i]
         i += 1
-    return concatted
+    return c_uint16(concatted).value
 
 def read_operands(defn, ins):
     """
