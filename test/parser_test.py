@@ -329,13 +329,7 @@ class ParserTest(unittest.TestCase):
             msg='exp.alternative.statements is not None. got={}'.format(exp.alternative))
 
     def test_if_else_expression(self):
-        # tests = [
-        #     ("true;", True),
-        #     ("false;", False)
-        # ]
         source = 'if (x < y) { x } else { y }'
-        # for t in tests:
-        # l = lexer.new(t[0])
         l = lexer.new(source)
         p = parser.new(l)
         program = p.parse_program()

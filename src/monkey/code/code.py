@@ -108,6 +108,7 @@ class OpCodes(ByteEnum):
     OpBang = auto()
     OpJumpNotTruthy = auto()
     OpJump = auto()
+    OpNull = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -132,6 +133,7 @@ definitions = {
     OpBang : Definition("OpBang", []),
     OpJumpNotTruthy : Definition("OpJumpNotTruthy", [2]),
     OpJump : Definition("OpJump", [2]),
+    OpNull : Definition("OpNull", []),
 }
 
 def lookup(op):
@@ -146,7 +148,7 @@ def lookup(op):
 
 def Make(op, *operands):
     """
-    Creates and returns a bytecode instruction as a bytearray (OpCode + Operand...)
+    Creates and returns a bytecode instruction as a bytearray (OpCode + *Operand(s))
     """
     if op not in definitions:
         return [bytes()]
@@ -168,15 +170,12 @@ def Make(op, *operands):
             offset += width
     return instruction
 
-# def readuint(bytes):
-#     return c_uint16(bytes)
-
 def put_int_16(array, unint16):
     """
     Constructs and returns a bytearray with the appropriate bytes 
     representing an usigned int
     """
-    return bytearray((unint16).to_bytes(byte_size(unint16), byteorder='little'))
+    return bytearray((unint16).to_bytes(byte_size(unint16), byteorder='big'))
 
 def byte_size(integer):
     """

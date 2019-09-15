@@ -99,14 +99,18 @@ class CompilerTest(unittest.TestCase):
                 # 0000
                 Make(OpTrue) +
                 # 0001
-                Make(OpJumpNotTruthy, 7) +
+                Make(OpJumpNotTruthy, 10) +
                 # 0004
                 Make(OpConstant, 0) +
-                # 0007; this pop is bc ifs are expressions with an added pop at end
+                # 0007
+                Make(OpJump, 11) +
+                # 0010
+                Make(OpNull) +
+                # 0011; this pop is bc ifs are expressions with an added pop at end
                 Make(OpPop) +
-                # 0008
+                # 0012
                 Make(OpConstant, 1) +
-                # 0011
+                # 0015
                 Make(OpPop)),
             CompilerTestCase("if (true) { 10 } else { 20 }; 3333;", [10, 20, 3333],
                 # 0000
@@ -124,7 +128,7 @@ class CompilerTest(unittest.TestCase):
                 # 0014
                 Make(OpConstant, 2) + 
                 # 0017
-                Make(OpPop))
+                Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
 

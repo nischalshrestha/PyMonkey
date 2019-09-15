@@ -61,6 +61,7 @@ class VMTest(unittest.TestCase):
             VmTestCase("!!true", True), 
             VmTestCase("!!false", False), 
             VmTestCase("!!5", True),
+            VmTestCase("!(if (false) { 5; })", True),
         ]
         self.run_vm_tests(tests)
     
@@ -73,6 +74,9 @@ class VMTest(unittest.TestCase):
             VmTestCase("if (1 < 2) { 10 }", 10), 
             VmTestCase("if (1 < 2) { 10 } else { 20 }", 10), 
             VmTestCase("if (1 > 2) { 10 } else { 20 }", 20), 
+            VmTestCase("if (1 > 2) { 10 }", Null), 
+            VmTestCase("if (false) { 10 }", Null),
+            VmTestCase("if ((if (false) { 10 })) { 10 } else { 20 }", 20),
         ]
         self.run_vm_tests(tests)
 
@@ -95,6 +99,8 @@ class VMTest(unittest.TestCase):
         elif type(expected) == bool:
             err = self.check_boolean_object(expected, actual)
             self.assertIsNone(err, msg=f'check_boolean_object failed: {err}')
+        elif type(expected) == Null:
+            self.assertEqual(actual, Null, msg=f'object is not Null: {type(actual)} {actual}')
 
     def check_integer_object(self, expected, actual):
         if not isinstance(actual, Integer):

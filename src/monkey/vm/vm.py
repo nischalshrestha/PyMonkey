@@ -14,6 +14,7 @@ STACK_SIZE = 2048
 # two instances we will ever need 
 TRUE = object.Boolean(True)
 FALSE = object.Boolean(False)
+NULL = object.Null()
 
 class VM:
 
@@ -101,11 +102,18 @@ class VM:
                 if not self.is_truthy(condition):
                     # if not truthy, instruction points to right before final destination
                     ip = pos - 1
+            elif op == code.OpNull:
+                err = self.push(NULL)
+                if err != None:
+                    return err
+                ip += 1
         return None
     
     def is_truthy(self, obj):
         if type(obj) == object.Boolean:
             return obj.value
+        elif type(obj) == object.Null:
+            return False
         return True
 
     def execute_binary_operation(self, op):
@@ -179,9 +187,11 @@ class VM:
 
     def execute_bang_operator(self):
         operand = self.pop()
-        if operand.value == True:
+        if operand == TRUE:
             return self.push(FALSE)
-        elif operand.value == False:
+        elif operand == FALSE:
+            return self.push(TRUE)
+        elif operand == NULL:
             return self.push(TRUE)
         else:
             return self.push(FALSE)

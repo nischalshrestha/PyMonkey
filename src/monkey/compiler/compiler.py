@@ -74,25 +74,24 @@ class Compiler:
             # expression; we want to keep the value of expression.
             if self.last_instruction_is_pop():
                 self.remove_last_pop()
-            # Handle consequence if there is alternative
+            # Emit an 'OpJump' with bogus value
+            jump_pos = self.emit(code.OpJump, 9999)
+            after_conseq_pos = len(self.instructions)
+            # Make OpJumpNotTruthy jump right after OpJump
+            self.change_operand(jump_not_truthy_pos, after_conseq_pos)
+            # Handle alternative if there is one, otherwise emit OpNull
             if node.alternative == None:
-                after_conseq_pos = len(self.instructions)
-                self.change_operand(jump_not_truthy_pos, after_conseq_pos)
+                self.emit(code.OpNull)
             else:
-                # Emit an 'OpJump' with bogus value
-                jump_pos = self.emit(code.OpJump, 9999)
-                # Make OpJumpNotTruthy jump right after OpJump
-                after_conseq_pos = len(self.instructions)
-                self.change_operand(jump_not_truthy_pos, after_conseq_pos)
                 # Compile alternative 
                 err = self.compile(node.alternative)
                 if err != None:
                     return err
                 if self.last_instruction_is_pop():
                     self.remove_last_pop()
-                # Patch operand of OpJump
-                after_alternative_pos = len(self.instructions)
-                self.change_operand(jump_pos, after_alternative_pos)
+            # Patch operand of OpJump
+            after_alternative_pos = len(self.instructions)
+            self.change_operand(jump_pos, after_alternative_pos)
         elif isinstance(node, ast.InfixExpression):
             # treat < as a special case by compiling right operand
             # before the left operand and simply work with OpGreaterThan
