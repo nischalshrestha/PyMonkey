@@ -109,6 +109,8 @@ class OpCodes(ByteEnum):
     OpJumpNotTruthy = auto()
     OpJump = auto()
     OpNull = auto()
+    OpGetGlobal = auto()
+    OpSetGlobal = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -134,6 +136,8 @@ definitions = {
     OpJumpNotTruthy : Definition("OpJumpNotTruthy", [2]),
     OpJump : Definition("OpJump", [2]),
     OpNull : Definition("OpNull", []),
+    OpGetGlobal: Definition("OpGetGlobal", [2]),
+    OpSetGlobal: Definition("OpSetGlobal", [2]),
 }
 
 def lookup(op):

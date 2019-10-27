@@ -131,6 +131,44 @@ class CompilerTest(unittest.TestCase):
                 Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
+    
+    def test_global_let_statements(self):
+        tests = [
+            CompilerTestCase(
+                """
+                let one = 1;
+                let two = 2;
+                """, 
+                [1, 2],
+                Make(OpConstant, 0) +
+                Make(OpSetGlobal, 0) +
+                Make(OpConstant, 1) +
+                Make(OpSetGlobal, 1)),
+            CompilerTestCase(
+                """
+                let one = 1;
+                one;
+                """, 
+                [1],
+                Make(OpConstant, 0) +
+                Make(OpSetGlobal, 0) +
+                Make(OpGetGlobal, 0) +
+                Make(OpPop)),
+            CompilerTestCase(
+                """
+                let one = 1;
+                let two = one;
+                two;
+                """, 
+                [1, 2],
+                Make(OpConstant, 0) +
+                Make(OpSetGlobal, 0) +
+                Make(OpGetGlobal, 0) +
+                Make(OpSetGlobal, 1) +
+                Make(OpGetGlobal, 1) + 
+                Make(OpPop))
+        ]
+        self.run_compiler_tests(tests)
 
     def run_compiler_tests(self, tests):
         for t in tests:

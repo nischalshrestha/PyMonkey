@@ -61,6 +61,10 @@ class Compiler:
                 err = self.compile(s)
                 if err != None:
                     return err
+        elif isinstance(node, ast.LetStatement):
+            err = self.compile(node.value)
+            if err != None:
+                return err
         elif isinstance(node, ast.IfExpression):
             err = self.compile(node.condition)
             if err != None:
