@@ -4,6 +4,8 @@ from monkey import parser
 from monkey import evaluator
 from monkey import compiler
 from monkey import vm
+from monkey.compiler import symbol_table
+from monkey.common import utilities
 from monkey.evaluator import macro_expansion
 import keyboard
 
@@ -26,11 +28,17 @@ def start(interpreter=True):
     # need one instance since we are persisting values
     env = environment.new_environment()
     macro_env = environment.new_environment()
+    # need to keep around constants, globals and symbol table for compiler
+    constants = []
+    global_vars = utilities.make_list(vm.GLOBAL_SIZE)
+    sym_table = symbol_table.new_symbol_table()
     while True:
         line = input(prompt)
         if line == 'exit()':
             print('Goodbye!\n')
             break
+        elif line == "":
+            continue
         l = lexer.new(line)
         p = parser.new(l)
         program = p.parse_program()
@@ -45,12 +53,14 @@ def start(interpreter=True):
                     print(evaluated.inspect(), '\n')
             else:
                 # Note: Compiler is not yet completed
-                comp = compiler.new()
+                comp = compiler.new_with_state(sym_table, constants)
                 err = comp.compile(program)
                 if err != None:
                     print(f'Woops! Compilation failed:\n{err}\n')
                     continue
-                machine = vm.new(comp.bytecode())
+                code = comp.bytecode()
+                constants = code.constants
+                machine = vm.new_with_global_store(code, global_vars)
                 err = machine.run()
                 if err != None:
                     print(f'Woops! Executing bytecode failed:\n{err}\n')

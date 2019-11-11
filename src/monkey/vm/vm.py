@@ -246,3 +246,8 @@ def new(bytecode):
         0,
         utilities.make_list(GLOBAL_SIZE)
     )
+
+def new_with_global_store(bytecode, globals):
+    vm = new(bytecode)
+    vm.global_vars = globals
+    return vm

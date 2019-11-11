@@ -225,3 +225,9 @@ def new():
         EmittedInstruction(None, 0),
         symbol_table.new_symbol_table()
     )
+
+def new_with_state(sym_table, constants):
+    compiler = new()
+    compiler.sym_table = sym_table
+    compiler.constants = constants
+    return compiler
