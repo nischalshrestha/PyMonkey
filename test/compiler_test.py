@@ -147,7 +147,7 @@ class CompilerTest(unittest.TestCase):
             CompilerTestCase(
                 """
                 let one = 1;
-                one;
+                one;  
                 """, 
                 [1],
                 Make(OpConstant, 0) +
@@ -160,7 +160,7 @@ class CompilerTest(unittest.TestCase):
                 let two = one;
                 two;
                 """, 
-                [1, 2],
+                [1],
                 Make(OpConstant, 0) +
                 Make(OpSetGlobal, 0) +
                 Make(OpGetGlobal, 0) +

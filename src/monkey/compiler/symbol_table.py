@@ -1,9 +1,6 @@
 from typing import NamedTuple
 from typing import Dict
 
-from monkey.compiler import *
-# from compiler import *
-
 GLOBAL_SCOPE = "GLOBAL"
 
 class Symbol(NamedTuple):
@@ -32,4 +29,10 @@ class SymbolTable:
 def new_symbol_table():
     return SymbolTable({})
 
-# print(Symbol(name='a', scope=GLOBAL_SCOPE, index=0) == Symbol(name='b', index=0, scope=GLOBAL_SCOPE))
+if __name__ == '__main__':
+    from compiler import *
+    # Some testing
+    print(new_symbol_table())
+    print(Symbol(name='a', scope=GLOBAL_SCOPE, index=0) == Symbol(name='b', index=0, scope=GLOBAL_SCOPE))
+else:
+    from monkey.compiler import *

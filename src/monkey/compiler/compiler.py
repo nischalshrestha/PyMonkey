@@ -10,6 +10,7 @@ from typing import List
 from monkey.ast import ast
 from monkey.object import *
 from monkey.code import code
+from monkey.compiler import symbol_table
 
 class Bytecode(NamedTuple):
     instructions: code.Instructions
@@ -25,12 +26,14 @@ class Compiler:
     constants: List[Integer] = None
     last_instruction: EmittedInstruction = None
     previous_instruction: EmittedInstruction = None
+    sym_table: symbol_table.SymbolTable
 
-    def __init__(self, instructions, constants, last_instruction, previous_instruction):
+    def __init__(self, instructions, constants, last_instruction, previous_instruction, sym_table):
         self.instructions = instructions
         self.constants = constants
         self.last_instruction = last_instruction
         self.previous_instruction = previous_instruction
+        self.sym_table = sym_table
 
     def compile(self, node):
         """
@@ -65,6 +68,13 @@ class Compiler:
             err = self.compile(node.value)
             if err != None:
                 return err
+            symbol = self.sym_table.define(node.name.value)
+            self.emit(code.OpSetGlobal, symbol.index)
+        elif isinstance(node, ast.Identifier):
+            symbol = self.sym_table.resolve(node.value)
+            if symbol == None:
+                return f"undefine variable {node.value}"
+            self.emit(code.OpGetGlobal, symbol.index)
         elif isinstance(node, ast.IfExpression):
             err = self.compile(node.condition)
             if err != None:
@@ -212,5 +222,6 @@ def new():
         bytearray(), 
         [], 
         EmittedInstruction(None, 0), 
-        EmittedInstruction(None, 0)
+        EmittedInstruction(None, 0),
+        symbol_table.new_symbol_table()
     )
