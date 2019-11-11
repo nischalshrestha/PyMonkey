@@ -10,6 +10,7 @@ from monkey import object
 from monkey.common import utilities
 
 STACK_SIZE = 2048
+GLOBAL_SIZE = 65536
 # instead of creating new booleans every time we need them, we just create the 
 # two instances we will ever need 
 TRUE = object.Boolean(True)
@@ -22,12 +23,14 @@ class VM:
     instructions: code.Instructions = None
     stack: List[object.Object] = []
     sp: int = 0
+    global_vars: List[object.Object]
 
-    def __init__(self, instructions, constants, stack, sp):
+    def __init__(self, instructions, constants, stack, sp, global_vars):
         self.instructions = instructions
         self.constants = constants
         self.stack = stack
         self.sp = sp
+        self.global_vars = global_vars
 
     def stack_top(self):
         return None if self.sp == 0 else self.stack[self.sp - 1]
@@ -51,6 +54,16 @@ class VM:
                 err = self.push(self.constants[const_index])
                 if err != None:
                     return err
+            elif op == code.OpSetGlobal:
+                global_index = code.bytes_to_int(self.instructions[ip+1:ip+3])
+                self.global_vars[global_index] = self.pop()
+                ip += 3
+            elif op == code.OpGetGlobal:
+                global_index = code.bytes_to_int(self.instructions[ip+1:ip+3])
+                err = self.push(self.global_vars[global_index])
+                if err != None:
+                    return err
+                ip += 3
             elif op == code.OpAdd or op == code.OpSub or op == code.OpMul or op == code.OpDiv:
                 err = self.execute_binary_operation(op)
                 if err != None:
@@ -230,5 +243,6 @@ def new(bytecode):
         bytecode.instructions, 
         bytecode.constants,
         utilities.make_list(STACK_SIZE), 
-        0
+        0,
+        utilities.make_list(GLOBAL_SIZE)
     )

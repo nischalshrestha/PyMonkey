@@ -36,6 +36,14 @@ class VMTest(unittest.TestCase):
         ]
         self.run_vm_tests(tests)
     
+    def test_let_statements(self):
+        tests = [
+            VmTestCase("let one = 1; one", 1),
+            VmTestCase("let one = 1; let two = 2; one + two", 3),
+            VmTestCase("let one = 1; let two = one + one; one + two", 3),
+        ]
+        self.run_vm_tests(tests)
+    
     def test_boolean_expressions(self):
         tests = [
             VmTestCase("1 < 2", True),
