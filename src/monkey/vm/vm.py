@@ -42,28 +42,32 @@ class VM:
         ip = 0
         while ip < len(self.instructions):
             op = self.instructions[ip]
+            dfn, _ = code.lookup(op)
+            # calculate width of Opcode + Operands; the + 1 is to make sure 
+            # entire width is included
+            width = sum(dfn.operand_widths) + 1
             if op == code.OpConstant:
                 # because we are using bytearray we will need to specify
                 # the end range of the instructions bytearray so we don't
                 # overshoot the operand and accidentally read next opcode
-                const_index = code.bytes_to_int(self.instructions[ip+1:ip+3])
+                const_index = code.bytes_to_int(self.instructions[ip+1:ip+width])
                 # we increment the ip offset variables based on the OpCode
                 # for e.g. here, we need to increment by 3 since we have an
                 # OpCode and two Operands
-                ip += 3
+                ip += width
                 err = self.push(self.constants[const_index])
                 if err != None:
                     return err
             elif op == code.OpSetGlobal:
-                global_index = code.bytes_to_int(self.instructions[ip+1:ip+3])
+                global_index = code.bytes_to_int(self.instructions[ip+1:ip+width])
                 self.global_vars[global_index] = self.pop()
-                ip += 3
+                ip += width
             elif op == code.OpGetGlobal:
-                global_index = code.bytes_to_int(self.instructions[ip+1:ip+3])
+                global_index = code.bytes_to_int(self.instructions[ip+1:ip+width])
                 err = self.push(self.global_vars[global_index])
                 if err != None:
                     return err
-                ip += 3
+                ip += width
             elif op == code.OpAdd or op == code.OpSub or op == code.OpMul or op == code.OpDiv:
                 err = self.execute_binary_operation(op)
                 if err != None:
@@ -100,7 +104,7 @@ class VM:
                 ip += 1
             elif op == code.OpJump:
                 # This one is just like OpConstant, need to jump to 3 places
-                pos = code.bytes_to_int(self.instructions[ip+1:ip+3])
+                pos = code.bytes_to_int(self.instructions[ip+1:ip+width])
                 # pos is the final destination, so instruction pointer should
                 # point to it
                 ip = pos
@@ -108,8 +112,8 @@ class VM:
                 # pos should be the place where we would jump to. For e.g:
                 # VmTestCase(input='if (1 > 2) { 10 } else { 20 }', expected=20)
                 # OpJumpNotTruthy ip=7 bytearray(b'\x10\x00\x01') next_ip=17 (jump to 0010)
-                pos = code.bytes_to_int(self.instructions[ip+1:ip+4])
-                ip += 3
+                pos = code.bytes_to_int(self.instructions[ip+1:ip+width+1])
+                ip += width
                 # In this case we need to actually see if condition was truthy
                 condition = self.pop()
                 if not self.is_truthy(condition):

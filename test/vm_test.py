@@ -73,20 +73,20 @@ class VMTest(unittest.TestCase):
         ]
         self.run_vm_tests(tests)
     
-    def test_conditionals(self):
-        tests = [
-            VmTestCase("if (true) { 10 }", 10),
-            VmTestCase("if (true) { 10 } else { 20 }", 10),
-            VmTestCase("if (false) { 10 } else { 20 }", 20), 
-            VmTestCase("if (1) { 10 }", 10), 
-            VmTestCase("if (1 < 2) { 10 }", 10), 
-            VmTestCase("if (1 < 2) { 10 } else { 20 }", 10), 
-            VmTestCase("if (1 > 2) { 10 } else { 20 }", 20), 
-            VmTestCase("if (1 > 2) { 10 }", Null), 
-            VmTestCase("if (false) { 10 }", Null),
-            VmTestCase("if ((if (false) { 10 })) { 10 } else { 20 }", 20),
-        ]
-        self.run_vm_tests(tests)
+    # def test_conditionals(self):
+    #     tests = [
+    #         VmTestCase("if (true) { 10 }", 10),
+    #         VmTestCase("if (true) { 10 } else { 20 }", 10),
+    #         VmTestCase("if (false) { 10 } else { 20 }", 20), 
+    #         VmTestCase("if (1) { 10 }", 10), 
+    #         VmTestCase("if (1 < 2) { 10 }", 10), 
+    #         VmTestCase("if (1 < 2) { 10 } else { 20 }", 10), 
+    #         VmTestCase("if (1 > 2) { 10 } else { 20 }", 20), 
+    #         VmTestCase("if (1 > 2) { 10 }", Null), 
+    #         VmTestCase("if (false) { 10 }", Null),
+    #         VmTestCase("if ((if (false) { 10 })) { 10 } else { 20 }", 20),
+    #     ]
+    #     self.run_vm_tests(tests)
 
     def run_vm_tests(self, tests):
         for t in tests:
