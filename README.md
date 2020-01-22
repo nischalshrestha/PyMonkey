@@ -12,11 +12,11 @@ The Monkey interpreter plus macros can be run with:
 
 The compiler isn't complete yet but can be run with a flag `--c`:
 
-`python compile.py --c`
+`python main.py --c`
 
 Ultimately, to compile a Monkey file, this command will be used instead:
 
-`python compile.py [Program.mnk] [args]`
+`python main.py [Program.mnk] [args]`
 
 **NOTE:** This is a personal project created for the sole purpose of learning how to build interpreters / compilers and honing my Python skills. You may borrow code under the licence.
 
