@@ -144,6 +144,8 @@ class VM:
         right_type = right.object_type()
         if left_type == object.INTEGER_OBJ and right_type == object.INTEGER_OBJ:
             return self.execute_binary_integer_operation(op, left, right)
+        elif left_type == object.STRING_OBJ and right_type == object.STRING_OBJ:
+            return self.execute_binary_string_operation(op, left, right)
         return f'unsupported types for binary operation: {left_type} {right_type}'
 
     def execute_binary_integer_operation(self, op, left, right):
@@ -164,7 +166,18 @@ class VM:
             result = left_value / right_value
         else:
             return f'unknown integer operator {op}'
-        self.push(object.Integer(value=result))
+        self.push(object.Integer(value = result))
+    
+    def execute_binary_string_operation(self, op, left, right):
+        """
+        Same as execute_binary_integer_operation except only OpAdd is allowed
+        because we only allow concatenation of Strings
+        """
+        if op != code.OpAdd:
+            return f'unknown string operator: {op}'
+        left_value = left.value
+        right_value = right.value
+        return self.push(object.String(value = left_value + right_value))
 
     def execute_comparison(self, op):
         """
@@ -217,7 +230,7 @@ class VM:
         operand = self.pop()
         if operand.object_type() != object.INTEGER_OBJ:
             return f'unsupported type for negation: {operand.object_type()}'
-        return self.push(object.Integer(value=-operand.value))
+        return self.push(object.Integer(value = -operand.value))
 
     def push(self, o):
         if self.sp >= STACK_SIZE:

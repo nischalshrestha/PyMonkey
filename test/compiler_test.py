@@ -92,6 +92,21 @@ class CompilerTest(unittest.TestCase):
                 Make(OpPop)),
         ]
         self.run_compiler_tests(tests)
+
+    def test_string_expressions(self):
+        tests = [
+            CompilerTestCase("\"monkey\"", ["monkey"], 
+                Make(OpConstant, 0) +
+                Make(OpPop)
+            ),
+            CompilerTestCase("\"mon\" + \"key\"", ["mon", "key"], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) + 
+                Make(OpAdd) +
+                Make(OpPop)
+            )
+        ]
+        self.run_compiler_tests(tests)
     
     def test_conditionals(self):
         tests = [
@@ -197,14 +212,24 @@ class CompilerTest(unittest.TestCase):
                 err = self.check_integer_object(constant, actual[i])
                 self.assertIsNone(err, 
                     msg=f'constant {i} - check_integer_object failed: {err}')
+            elif isinstance(constant, str):
+                err = self.check_string_object(constant, actual[i])
+                self.assertIsNone(err,
+                    msg=f'constant {i} - check_string_object failed: {err}')
         return None
     
     def check_integer_object(self, expected, actual):
         if not isinstance(actual, Integer):
-            return (f'object is not Integer. got={type(actual)} {actual}')
+            return f'object is not Integer. got={type(actual)} {actual}'
         if actual.value != expected:
-            return (f'object has wrong value. got={actual.value} want={expected}')
+            return f'object has wrong value. got={actual.value} want={expected}'
         return None
+
+    def check_string_object(self, expected, actual):
+        if not isinstance(actual, String):
+            return f'object is not String. got={type(actual)} {actual}'
+        if actual.value != expected:
+            return f'object has wrong value. got={actual.value} want={expected}'
     
     def parse(self, source):
         l = lexer.new(source)

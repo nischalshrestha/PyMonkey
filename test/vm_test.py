@@ -73,6 +73,14 @@ class VMTest(unittest.TestCase):
         ]
         self.run_vm_tests(tests)
     
+    def test_string_expressions(self):
+        tests = [
+            VmTestCase("\"monkey\"", "monkey"),
+            VmTestCase("\"mon\" + \"key\"", "monkey"),
+            VmTestCase("\"monkey\" + \"banana\"", "monkeybanana"),
+        ]
+        self.run_vm_tests(tests)
+
     def test_conditionals(self):
         tests = [
             VmTestCase("if (true) { 10 }", 10),
@@ -107,21 +115,31 @@ class VMTest(unittest.TestCase):
         elif type(expected) == bool:
             err = self.check_boolean_object(expected, actual)
             self.assertIsNone(err, msg=f'check_boolean_object failed: {err}')
+        elif type(expected) == str:
+            err = self.check_string_object(expected, actual)
+            self.assertIsNone(err, msg=f'check_string_object failed: {err}')
         elif type(expected) == Null:
             self.assertEqual(actual, Null, msg=f'object is not Null: {type(actual)} {actual}')
 
     def check_integer_object(self, expected, actual):
         if not isinstance(actual, Integer):
-            return (f'object is not Integer. got={type(actual)} {actual}')
+            return f'object is not Integer. got={type(actual)} {actual}'
         if actual.value != expected:
-            return (f'object has wrong value. got={actual.value} want={expected}')
+            return f'object has wrong value. got={actual.value} want={expected}'
+        return None
+
+    def check_string_object(self, expected, actual):
+        if not isinstance(actual, String):
+            return f'object is not String. got={type(actual)} {actual}'
+        if actual.value != expected:
+            return f'object has wrong value. got={actual.value}, want={expected}'
         return None
     
     def check_boolean_object(self, expected, actual):
         if not isinstance(actual, Boolean):
-            return (f'object is not Boolean. got={type(actual)} {actual}')
+            return f'object is not Boolean. got={type(actual)} {actual}'
         if actual.value != expected:
-            return (f'object has wrong value. got={actual.value} want={expected}')
+            return f'object has wrong value. got={actual.value} want={expected}'
         return None
 
     def parse(self, source):

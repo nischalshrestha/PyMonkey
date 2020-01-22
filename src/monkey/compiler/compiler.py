@@ -149,6 +149,9 @@ class Compiler:
                 self.emit(code.OpTrue)
             else:
                 self.emit(code.OpFalse)
+        elif isinstance(node, ast.StringLiteral):
+            string = String(value=node.value)
+            self.emit(code.OpConstant, self.add_constant(string))
         return None
 
     def last_instruction_is_pop(self):

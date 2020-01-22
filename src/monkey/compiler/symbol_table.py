@@ -9,6 +9,7 @@ class Symbol(NamedTuple):
     index: int
 
 class SymbolTable:
+    """This class stores a dict representing all the variables in Monkey"""
     store: Dict[str, Symbol]
     num_definitions: int
 
