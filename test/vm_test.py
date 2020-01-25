@@ -95,6 +95,14 @@ class VMTest(unittest.TestCase):
             VmTestCase("if ((if (false) { 10 })) { 10 } else { 20 }", 20),
         ]
         self.run_vm_tests(tests)
+    
+    def test_array_literals(self):
+        tests = [
+            VmTestCase("[]", []),
+            VmTestCase("[1, 2, 3]", [1, 2, 3]),
+            VmTestCase("[1 + 2, 3 * 4, 5 + 6]", [3, 12, 11]),
+        ]
+        self.run_vm_tests(tests)
 
     def run_vm_tests(self, tests):
         for t in tests:
@@ -120,6 +128,14 @@ class VMTest(unittest.TestCase):
             self.assertIsNone(err, msg=f'check_string_object failed: {err}')
         elif type(expected) == Null:
             self.assertEqual(actual, Null, msg=f'object is not Null: {type(actual)} {actual}')
+        elif type(expected) == []:
+            self.assertEqual(actual, Array, msg=f'object is not Array: {type(actual)} {actual}')
+            self.assertEqual(len(actual.elements), len(expected), 
+                msg=f'wrong num of elements. want={len(expected)} got={len(actual.elements)}')
+            for i, e in enumerate(expected):
+                err = self.check_integer_object(e, actual.elements[i])
+                self.assertIsNone(err, None, msg=f'check_integer_object failed: {err}')
+
 
     def check_integer_object(self, expected, actual):
         if not isinstance(actual, Integer):

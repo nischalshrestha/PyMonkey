@@ -3,7 +3,6 @@ Monkey VM
 """
 
 from typing import List
-
 from monkey import code
 from monkey import compiler
 from monkey import object
@@ -21,8 +20,8 @@ class VM:
 
     constants: List[object.Object] = []
     instructions: code.Instructions = None
-    stack: List[object.Object] = []
-    sp: int = 0
+    stack: List[object.Object] = [] # stack top
+    sp: int = 0 # stack top index
     global_vars: List[object.Object]
 
     def __init__(self, instructions, constants, stack, sp, global_vars):
@@ -124,7 +123,21 @@ class VM:
                 if err != None:
                     return err
                 ip += 1
+            elif op == code.OpArray:
+                num_elements = code.bytes_to_int(self.instructions[ip+1:ip+width+1])
+                ip += width
+                array = self.build_array(self.sp - num_elements, self.sp)
+                self.sp = self.sp - num_elements
+                err = self.push(array)
+                if err != None:
+                    return err
         return None
+
+    def build_array(self, start_idx, end_idx):
+        elements = utilities.make_list(end_idx - start_idx)
+        for i in range(end_idx):
+            elements[i - start_idx] = self.stack[i]
+        return object.Array(elements = elements)
     
     def is_truthy(self, obj):
         if type(obj) == object.Boolean:
