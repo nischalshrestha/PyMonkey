@@ -152,6 +152,12 @@ class Compiler:
         elif isinstance(node, ast.StringLiteral):
             string = String(value=node.value)
             self.emit(code.OpConstant, self.add_constant(string))
+        elif isinstance(node, ast.ArrayLiteral):
+            for e in node.elements:
+                err = self.compile(e)
+                if err != None:
+                    return err
+            self.emit(code.OpArray, len(node.elements))
         return None
 
     def last_instruction_is_pop(self):

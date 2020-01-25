@@ -185,6 +185,38 @@ class CompilerTest(unittest.TestCase):
         ]
         self.run_compiler_tests(tests)
 
+    def test_array_literals(self):
+        tests = [
+            CompilerTestCase(
+                "[]", 
+                [], 
+                Make(OpArray, 0) + 
+                Make(OpPop)),
+            CompilerTestCase(
+                "[1, 2, 3]", 
+                [1, 2, 3], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpConstant, 2) +
+                Make(OpArray, 3) + 
+                Make(OpPop)),
+            CompilerTestCase(
+                "[1 + 2, 3 - 4, 5 * 6]", 
+                [1, 2, 3, 4, 5, 6], 
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpAdd) +
+                Make(OpConstant, 2) +
+                Make(OpConstant, 3) +
+                Make(OpSub) +
+                Make(OpConstant, 4) +
+                Make(OpConstant, 5) +
+                Make(OpMul) +
+                Make(OpArray, 3) + 
+                Make(OpPop)),
+        ]
+        self.run_compiler_tests(tests)
+
     def run_compiler_tests(self, tests):
         for t in tests:
             program = self.parse(t.source)
