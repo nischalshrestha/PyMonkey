@@ -1,5 +1,5 @@
 import unittest
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from typing import Any
 import sys
 sys.path.append("../src/")
@@ -104,6 +104,26 @@ class VMTest(unittest.TestCase):
         ]
         self.run_vm_tests(tests)
 
+    def test_hash_literals(self):
+        tests = [
+            VmTestCase("{}", {}),
+            VmTestCase(
+                "{1: 2, 2: 3}", 
+                {
+                    Integer(1).hash_key(): 2, 
+                    Integer(2).hash_key(): 3
+                }
+            ),
+            VmTestCase(
+                "{1 + 1: 2 * 2, 3 + 3: 4 * 4}", 
+                {
+                    Integer(2).hash_key(): 4, 
+                    Integer(6).hash_key(): 16
+                }
+            ),
+        ]
+        self.run_vm_tests(tests)
+
     def run_vm_tests(self, tests):
         for t in tests:
             program = self.parse(t.input)
@@ -135,7 +155,15 @@ class VMTest(unittest.TestCase):
             for i, e in enumerate(expected):
                 err = self.check_integer_object(e, actual.elements[i])
                 self.assertIsNone(err, None, msg=f'check_integer_object failed: {err}')
-
+        elif type(expected) == dict:
+            self.assertEqual(type(actual), Hash, msg=f'object is not Hash: {type(actual)} {actual}')
+            self.assertEqual(len(actual.pairs), len(expected), 
+                msg=f'hash has wrong num of Pairs. want={len(expected)} got={len(actual.pairs)}')
+            for k, v in expected.items():
+                if k not in actual.pairs:
+                    self.fail(f'no pair for given key in pairs')
+                err = self.check_integer_object(v, actual.pairs[k].value)
+                self.assertIsNone(err, msg=f'check_integer_object failed: {err}')
 
     def check_integer_object(self, expected, actual):
         if not isinstance(actual, Integer):

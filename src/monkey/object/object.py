@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from monkey import ast
 
 """
@@ -153,16 +154,16 @@ class HashPair:
         self.value = value
 
 class Hash(Object):
-    pairs = {} # <hash key, HashPair>
+    pairs = OrderedDict() # <hash key, HashPair>
     def __init__(self, pairs):
         self.pairs = pairs
     def object_type(self):
         return HASH_OBJ
     def inspect(self):
-        pairs = []
+        string_pairs = []
         for key, value in self.pairs.items():
-            pairs.append(f"{key.inspect()}:  {value.value.inspect()}")
-        out = "{" + ", ".join(pairs) + "}"
+            string_pairs.append(f"{key.inspect()}:  {value.value.inspect()}")
+        out = "{" + ", ".join(string_pairs) + "}"
         return out
 
 class Quote(Object):

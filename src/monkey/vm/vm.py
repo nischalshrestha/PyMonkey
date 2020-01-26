@@ -1,7 +1,7 @@
 """
 Monkey VM
 """
-
+from collections import OrderedDict
 from typing import List
 from monkey import code
 from monkey import compiler
@@ -124,11 +124,21 @@ class VM:
                     return err
                 ip += 1
             elif op == code.OpArray:
-                num_elements = code.bytes_to_int(self.instructions[ip+1:ip+width+1])
+                num_elements = code.bytes_to_int(self.instructions[ip+1:ip+width])
                 ip += width
                 array = self.build_array(self.sp - num_elements, self.sp)
                 self.sp = self.sp - num_elements
                 err = self.push(array)
+                if err != None:
+                    return err
+            elif op == code.OpHash:
+                num_elements = code.bytes_to_int(self.instructions[ip+1:ip+width])
+                ip += width
+                h, err = self.build_hash(self.sp - num_elements, self.sp)
+                if err != None:
+                    return err
+                self.sp = self.sp - num_elements
+                err = self.push(h)
                 if err != None:
                     return err
         return None
@@ -138,6 +148,20 @@ class VM:
         for i in range(end_idx):
             elements[i - start_idx] = self.stack[i]
         return object.Array(elements = elements)
+    
+    def build_hash(self, start_idx, end_idx):
+        hashed_pairs = OrderedDict()
+        for i in range(start_idx, end_idx, 2):
+            key = self.stack[i]
+            value = self.stack[i + 1]
+            pair = object.HashPair(key, value)
+            # check if the key is "hashable" by trying to call a hash_key
+            try:
+                hash_key = key.hash_key()
+                hashed_pairs[hash_key] = pair
+            except:
+                return None, f'unusable as hash key: {type(key)}'
+        return object.Hash(hashed_pairs), None
     
     def is_truthy(self, obj):
         if type(obj) == object.Boolean:

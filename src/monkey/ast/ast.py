@@ -357,7 +357,7 @@ class IndexExpression(Expression):
 
 class HashLiteral(Expression):
     token = None # { token
-    pairs = OrderedDict() # Dict[Expression]
+    pairs = OrderedDict() # OrderedDict[Expression]
 
     def __init__(self, token=None, pairs=None):
         self.token = token

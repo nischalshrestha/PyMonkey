@@ -160,6 +160,7 @@ class Compiler:
             self.emit(code.OpArray, len(node.elements))
         elif isinstance(node, ast.HashLiteral):
             keys = []
+            # There's no need to sort keys since pairs is an OrderedDict
             for k in node.pairs:
                 err = self.compile(k)
                 if err != None:
