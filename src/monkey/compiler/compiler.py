@@ -158,6 +158,16 @@ class Compiler:
                 if err != None:
                     return err
             self.emit(code.OpArray, len(node.elements))
+        elif isinstance(node, ast.HashLiteral):
+            keys = []
+            for k in node.pairs:
+                err = self.compile(k)
+                if err != None:
+                    return err
+                err = self.compile(node.pairs[k])
+                if err != None:
+                    return err
+            self.emit(code.OpHash, len(node.pairs)*2)
         return None
 
     def last_instruction_is_pop(self):

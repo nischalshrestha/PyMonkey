@@ -1,5 +1,6 @@
 # from typing import NamedTuple
 from monkey.tokens import token
+from collections import OrderedDict
 
 class Node:
     # this method used only for debugging
@@ -356,7 +357,7 @@ class IndexExpression(Expression):
 
 class HashLiteral(Expression):
     token = None # { token
-    pairs = {} # Dict[Expression]
+    pairs = OrderedDict() # Dict[Expression]
 
     def __init__(self, token=None, pairs=None):
         self.token = token

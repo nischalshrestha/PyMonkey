@@ -112,6 +112,7 @@ class OpCodes(ByteEnum):
     OpGetGlobal = auto()
     OpSetGlobal = auto()
     OpArray = auto()
+    OpHash = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -121,25 +122,26 @@ class Definition(NamedTuple):
 
 # Holds the Definitions for all the OpCodes in Monkey
 definitions = {
-    OpConstant : Definition("OpConstant", [2]),
-    OpAdd : Definition("OpAdd", []),
-    OpPop : Definition("OpPop", []),
-    OpSub : Definition("OpSub", []),
-    OpMul : Definition("OpMul", []),
-    OpDiv : Definition("OpDiv", []),
-    OpTrue : Definition("OpTrue", []),
-    OpFalse : Definition("OpFalse", []),
-    OpEqual : Definition("OpEqual", []),
-    OpNotEqual : Definition("OpNotEqual", []),
-    OpGreaterThan : Definition("OpGreaterThan", []),
-    OpMinus : Definition("OpMinus", []),
-    OpBang : Definition("OpBang", []),
-    OpJumpNotTruthy : Definition("OpJumpNotTruthy", [2]),
-    OpJump : Definition("OpJump", [2]),
-    OpNull : Definition("OpNull", []),
+    OpConstant: Definition("OpConstant", [2]),
+    OpAdd: Definition("OpAdd", []),
+    OpPop: Definition("OpPop", []),
+    OpSub: Definition("OpSub", []),
+    OpMul: Definition("OpMul", []),
+    OpDiv: Definition("OpDiv", []),
+    OpTrue: Definition("OpTrue", []),
+    OpFalse: Definition("OpFalse", []),
+    OpEqual: Definition("OpEqual", []),
+    OpNotEqual: Definition("OpNotEqual", []),
+    OpGreaterThan: Definition("OpGreaterThan", []),
+    OpMinus: Definition("OpMinus", []),
+    OpBang: Definition("OpBang", []),
+    OpJumpNotTruthy: Definition("OpJumpNotTruthy", [2]),
+    OpJump: Definition("OpJump", [2]),
+    OpNull: Definition("OpNull", []),
     OpGetGlobal: Definition("OpGetGlobal", [2]),
     OpSetGlobal: Definition("OpSetGlobal", [2]),
     OpArray: Definition("OpArray", [2]),
+    OpHash: Definition("OpHash", [2]),
 }
 
 def lookup(op):
