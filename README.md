@@ -48,7 +48,7 @@ Inside the [test](https://github.com/nischalshrestha/PyMonkey/tree/master/test):
 
 - [x] Compile expressions
 - [x] Conditionals
-- [ ] Data structures
+- [x] Data structures
 - [ ] Functions
 - [ ] Closures
 
