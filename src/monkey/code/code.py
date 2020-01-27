@@ -113,6 +113,7 @@ class OpCodes(ByteEnum):
     OpSetGlobal = auto()
     OpArray = auto()
     OpHash = auto()
+    OpIndex = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -142,6 +143,7 @@ definitions = {
     OpSetGlobal: Definition("OpSetGlobal", [2]),
     OpArray: Definition("OpArray", [2]),
     OpHash: Definition("OpHash", [2]),
+    OpIndex: Definition("OpIndex", []),
 }
 
 def lookup(op):

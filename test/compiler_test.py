@@ -253,6 +253,36 @@ class CompilerTest(unittest.TestCase):
             ),
         ]
         self.run_compiler_tests(tests)
+    
+    def test_index_expressions(self):
+        tests = [
+            CompilerTestCase(
+                "[1, 2, 3][1 + 1]",
+                [1, 2, 3, 1, 1],
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpConstant, 2) +
+                Make(OpArray, 3) +
+                Make(OpConstant, 3) +
+                Make(OpConstant, 4) +
+                Make(OpAdd) +
+                Make(OpIndex) +
+                Make(OpPop)
+            ),
+            CompilerTestCase(
+                "{1: 2}[2 - 1]",
+                [1, 2, 2, 1],
+                Make(OpConstant, 0) +
+                Make(OpConstant, 1) +
+                Make(OpHash, 2) +
+                Make(OpConstant, 2) +
+                Make(OpConstant, 3) +
+                Make(OpSub) +
+                Make(OpIndex) +
+                Make(OpPop)
+            )
+        ]
+        self.run_compiler_tests(tests)
 
     def run_compiler_tests(self, tests):
         for t in tests:

@@ -1,5 +1,5 @@
 import unittest
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 from typing import Any
 import sys
 sys.path.append("../src/")
@@ -121,6 +121,21 @@ class VMTest(unittest.TestCase):
                     Integer(6).hash_key(): 16
                 }
             ),
+        ]
+        self.run_vm_tests(tests)
+    
+    def test_index_expressions(self):
+        tests = [
+            VmTestCase("[1, 2, 3][1]", 2),
+            VmTestCase("[1, 2, 3][0 + 2]", 3),
+            VmTestCase("[[1, 1, 1]][0][0]", 1),
+            VmTestCase("[][0]", Null),
+            VmTestCase("[1, 2, 3][99]", Null),
+            VmTestCase("[1][-1]", Null),
+            VmTestCase("{1: 1, 2: 2}[1]", 1),
+            VmTestCase("{1: 1, 2: 2}[2]", 2),
+            VmTestCase("{1: 1}[0]", Null),
+            VmTestCase("{}[0]", Null),
         ]
         self.run_vm_tests(tests)
 

@@ -141,6 +141,13 @@ class VM:
                 err = self.push(h)
                 if err != None:
                     return err
+            elif op == code.OpIndex:
+                index = self.pop()
+                left = self.pop()
+                err = self.execute_index_expression(left, index)
+                if err != None:
+                    return err
+                ip += width
         return None
 
     def build_array(self, start_idx, end_idx):
@@ -162,7 +169,7 @@ class VM:
             except:
                 return None, f'unusable as hash key: {type(key)}'
         return object.Hash(hashed_pairs), None
-    
+
     def is_truthy(self, obj):
         if type(obj) == object.Boolean:
             return obj.value
@@ -247,6 +254,42 @@ class VM:
             return self.push(self.native_bool_to_boolean_object(left_value > right_value))
         else:
             return f'unknown operator {op}'
+    
+    def execute_index_expression(self, left, index):
+        if left.object_type() == object.ARRAY_OBJ and index.object_type() == object.INTEGER_OBJ:
+            return self.execute_array_index(left, index)
+        elif left.object_type() == object.HASH_OBJ:
+            return self.execute_hash_index(left, index)
+        return f'index operator not supported: {left.object_type()}'
+    
+    def execute_array_index(self, array, index):
+        """
+        Executes and returns element form an array index operation. 
+        If index is invalid, pushes NULL and returns.
+        """
+        i = index.value
+        max_idx = len(array.elements) - 1
+        if i < 0 or i > max_idx:
+            return self.push(NULL)
+        return self.push(array.elements[i])
+
+    def execute_hash_index(self, hash_object, index):
+        """
+        Executes and returns element from an hash index operation. If index is 
+        not hashable, return error message. If hash key does not exist in hash, 
+        pushes NULL and returns.
+        """
+        # check if index is hashable
+        try:
+            hash_key = index.hash_key()
+        except:
+            return f'unusable as hash key: {type(key)}'
+        # check if hash key is valid
+        try:
+            pair = hash_object.pairs[hash_key]
+        except:
+            return self.push(NULL)
+        return self.push(pair.value)
     
     def native_bool_to_boolean_object(self, boolean):
         """Convert Python boolean to Boolean Object."""
