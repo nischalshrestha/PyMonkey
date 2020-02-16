@@ -283,6 +283,25 @@ class CompilerTest(unittest.TestCase):
             )
         ]
         self.run_compiler_tests(tests)
+    
+    def test_functions(self):
+        tests = [
+            CompilerTestCase(
+                "fn() { return 5 + 10 }",
+                [
+                    5, 
+                    10,
+                    Instructions(
+                        Make(OpConstant, 0) +
+                        Make(OpConstant, 1) +
+                        Make(OpAdd) +
+                        Make(OpReturnValue)
+                    )
+                ],
+                Make(OpConstant, 2) + Make(OpPop)
+            )
+        ]
+        self.run_compiler_tests(tests)
 
     def run_compiler_tests(self, tests):
         for t in tests:
@@ -315,6 +334,12 @@ class CompilerTest(unittest.TestCase):
                 err = self.check_string_object(constant, actual[i])
                 self.assertIsNone(err,
                     msg=f'constant {i} - check_string_object failed: {err}')
+            elif isinstance(constant, Instructions):
+                self.assertTrue(instance(actual[i], CompiledFunction),
+                    msg=f'constant {i} - not a function: {actual[i]}')
+                err = self.check_instructions(constant, expected.instructions)
+                self.assertIsNone(err, 
+                    msg=f'constant {i} - check_instructions failed: {err}')
         return None
     
     def check_integer_object(self, expected, actual):

@@ -20,13 +20,16 @@ class EmittedInstruction(NamedTuple):
     opcode: bytes
     position: int
 
-class Compiler:
+class CompilationScope(NamedTuple):
+    instructions: bytearray
+    last_instruction: EmittedInstruction
+    previous_instruction: EmittedInstruction
 
-    instructions: bytearray = None
-    constants: List[Integer] = None
-    last_instruction: EmittedInstruction = None
-    previous_instruction: EmittedInstruction = None
+class Compiler:
     sym_table: symbol_table.SymbolTable
+    constants: List[Integer]
+    scopes: List[CompilationScope]
+    scope_index: int
 
     def __init__(self, instructions, constants, last_instruction, previous_instruction, sym_table):
         self.instructions = instructions

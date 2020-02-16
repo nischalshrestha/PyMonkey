@@ -114,6 +114,9 @@ class OpCodes(ByteEnum):
     OpArray = auto()
     OpHash = auto()
     OpIndex = auto()
+    OpCall = auto()
+    OpReturnValue = auto()
+    OpReturn = auto()
 
 class Definition(NamedTuple):
     name: str
@@ -144,6 +147,9 @@ definitions = {
     OpArray: Definition("OpArray", [2]),
     OpHash: Definition("OpHash", [2]),
     OpIndex: Definition("OpIndex", []),
+    OpCall: Definition("OpCall", []),
+    OpReturnValue: Definition("OpReturnValue", []),
+    OpReturn: Definition("OpReturn", []),
 }
 
 def lookup(op):

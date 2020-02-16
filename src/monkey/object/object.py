@@ -17,6 +17,7 @@ ARRAY_OBJ = 'ARRAY'
 HASH_OBJ = 'HASH'
 QUOTE_OBJ = 'QUOTE'
 MACRO_OBJ = 'MACRO'
+COMPILED_FUNCTION_OBJ = 'COMPILED_FUNCTION_OBJ'
 
 # object "interface"
 class Object:
@@ -110,6 +111,19 @@ class Function(Object):
         out = out + self.body.string()
         out = out + '\n}'
         return out
+
+class CompiledFunction(Object):
+    instructions = None # code.Instructions
+
+    def __init__(self, instructions):
+        self.instructions = instructions
+
+    def object_type(self):
+        return COMPILED_FUNCTION_OBJ
+    
+    def inspect(self):
+        return f'CompiledFunction{self}'
+
     
 class Builtin(Object):
     fn = None # function
