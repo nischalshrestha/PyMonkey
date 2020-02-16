@@ -302,7 +302,41 @@ class CompilerTest(unittest.TestCase):
             )
         ]
         self.run_compiler_tests(tests)
-
+    
+    def test_compiler_scopes(self):
+        compiler = c.new()
+        self.assertEqual(compiler.scope_index, 0, 
+            msg=f'scope_index wrong. got={compiler.scope_index}, want=0')
+        compiler.emit(OpMul)
+        # in a new scope, scope_index should increase, but only have 1 instruction
+        # if we emit 1 Opcode inside that scope
+        compiler.enter_scope()
+        self.assertEqual(compiler.scope_index, 1,
+            msg=f'scope_index wrong. got={compiler.scope_index}, want=1')
+        compiler.emit(OpSub)
+        self.assertEqual(len(compiler.scopes[compiler.scope_index].instructions), 
+            1,
+            msg=f'instructions length wrong. got={len(compiler.scopes[compiler.scope_index].instructions)}')
+        last = compiler.scopes[compiler.scope_index].last_instruction
+        self.assertEqual(last.opcode, OpSub,
+            msg=f'last_instruction.opcode wrong. got={last.opcode}, want={OpSub}')
+        compiler.leave_scope()
+        # when we leave the scope, scope_index should go back to what it was in
+        # previous scope
+        self.assertEqual(compiler.scope_index, 0,
+            msg=f'scope_index wrong. got={compiler.scope_index}, want=0')
+        # when we add another OpCode should reflect 2 instructions and not > 2
+        compiler.emit(OpAdd)
+        self.assertEqual(len(compiler.scopes[compiler.scope_index].instructions), 
+            2,
+            msg=f'instructions length wrong. got={len(compiler.scopes[compiler.scope_index].instructions)}')
+        last = compiler.scopes[compiler.scope_index].last_instruction
+        self.assertEqual(last.opcode, OpAdd,
+            msg=f'last_instruction.opcode wrong. got={last.opcode}, want={OpAdd}')
+        previous = compiler.scopes[compiler.scope_index].previous_instruction
+        self.assertEqual(previous.opcode, OpMul,
+            msg=f'previous_instruction.opcode wrong. got={previous.opcode}, want={OpMul}')
+            
     def run_compiler_tests(self, tests):
         for t in tests:
             program = self.parse(t.source)

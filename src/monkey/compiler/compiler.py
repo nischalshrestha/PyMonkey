@@ -20,10 +20,15 @@ class EmittedInstruction(NamedTuple):
     opcode: bytes
     position: int
 
-class CompilationScope(NamedTuple):
+class CompilationScope:
     instructions: bytearray
     last_instruction: EmittedInstruction
     previous_instruction: EmittedInstruction
+
+    def __init__(self, instructions, last_instruction, previous_instruction):
+        self.instructions = instructions
+        self.last_instruction = last_instruction
+        self.previous_instruction = previous_instruction
 
 class Compiler:
     sym_table: symbol_table.SymbolTable
@@ -31,12 +36,29 @@ class Compiler:
     scopes: List[CompilationScope]
     scope_index: int
 
-    def __init__(self, instructions, constants, last_instruction, previous_instruction, sym_table):
-        self.instructions = instructions
+    def __init__(self, constants, sym_table, scopes, scope_index):
         self.constants = constants
-        self.last_instruction = last_instruction
-        self.previous_instruction = previous_instruction
         self.sym_table = sym_table
+        self.scopes = scopes
+        self.scope_index = scope_index
+    
+    def current_instructions(self):
+        return self.scopes[self.scope_index].instructions
+    
+    def enter_scope(self):
+        scope = CompilationScope(
+            bytearray(),
+            EmittedInstruction(None, 0), 
+            EmittedInstruction(None, 0)
+        )
+        self.scopes.append(scope)
+        self.scope_index += 1
+    
+    def leave_scope(self):
+        instructions = self.current_instructions()
+        self.scopes = self.scopes[:len(self.scopes) - 1]
+        self.scope_index -= 1
+        return instructions
 
     def compile(self, node):
         """
@@ -93,7 +115,7 @@ class Compiler:
                 self.remove_last_pop()
             # Emit an 'OpJump' with bogus value
             jump_pos = self.emit(code.OpJump, 9999)
-            after_conseq_pos = len(self.instructions)
+            after_conseq_pos = len(self.current_instructions())
             # Make OpJumpNotTruthy jump right after OpJump
             self.change_operand(jump_not_truthy_pos, after_conseq_pos)
             # Handle alternative if there is one, otherwise emit OpNull
@@ -107,7 +129,7 @@ class Compiler:
                 if self.last_instruction_is_pop():
                     self.remove_last_pop()
             # Patch operand of OpJump
-            after_alternative_pos = len(self.instructions)
+            after_alternative_pos = len(self.current_instructions())
             self.change_operand(jump_pos, after_alternative_pos)
         elif isinstance(node, ast.InfixExpression):
             # treat < as a special case by compiling right operand
@@ -183,11 +205,15 @@ class Compiler:
         return None
 
     def last_instruction_is_pop(self):
-        return self.last_instruction.opcode == code.OpPop
+        return self.scopes[self.scope_index].last_instruction.opcode == code.OpPop
     
     def remove_last_pop(self):
-        self.instructions = self.instructions[:self.last_instruction.position]
-        self.last_instruction = self.previous_instruction
+        last = self.scopes[self.scope_index].last_instruction
+        previous = self.scopes[self.scope_index].previous_instruction
+        old = self.current_instructions()
+        new = old[:last.position]
+        self.scopes[self.scope_index].instructions = new
+        self.scopes[self.scope_index].last_instruction = previous
 
     def add_constant(self, obj):
         """
@@ -210,16 +236,16 @@ class Compiler:
         """
         Sets the last instruction given opcode and position
         """
-        previous = self.last_instruction
+        previous = self.scopes[self.scope_index].last_instruction
         last = EmittedInstruction(op, pos)
-        self.previous_instruction = previous
-        self.last_instruction = last
+        self.scopes[self.scope_index].previous_instruction = previous
+        self.scopes[self.scope_index].last_instruction = last
     
     def change_operand(self, pos, operand):
         """
         Changes the old operand of an instruction to a new operand
         """
-        op = self.instructions[pos]
+        op = self.current_instructions()[pos]
         new_instruction = code.Make(op, operand)
         self.replace_instruction(pos, new_instruction)
     
@@ -230,15 +256,18 @@ class Compiler:
         consequence. 
         Assumption: we only replace instructions of same type with same non-variable length
         """
+        ins =  self.current_instructions()
         for i in range(len(new_instruction)):
-            self.instructions[pos+i] = new_instruction[i]
+            ins[pos+i] = new_instruction[i]
 
     def add_instruction(self, ins):
         """
         Add an instruction and return its position in the instructions bytearray
         """
-        pos_new_instruction = len(self.instructions)
-        self.instructions += ins
+        pos_new_instruction = len(self.current_instructions())
+        updated_instructions = self.current_instructions() + ins
+        # print(updated_instructions, type(updated_instructions), type(self.scopes[self.scope_index].instructions))
+        self.scopes[self.scope_index].instructions = updated_instructions
         return pos_new_instruction
     
     def bytecode(self):
@@ -246,15 +275,19 @@ class Compiler:
         Return a bytecode representation of all instructions and the constant
         pool.
         """
-        return Bytecode(self.instructions, self.constants)
+        return Bytecode(self.current_instructions(), self.constants)
 
 def new():
-    return Compiler(
-        bytearray(), 
-        [], 
+    main_scope = CompilationScope(
+        bytearray(),
         EmittedInstruction(None, 0), 
-        EmittedInstruction(None, 0),
-        symbol_table.new_symbol_table()
+        EmittedInstruction(None, 0)
+    )
+    return Compiler(
+        [], 
+        symbol_table.new_symbol_table(),
+        [main_scope],
+        0
     )
 
 def new_with_state(sym_table, constants):
