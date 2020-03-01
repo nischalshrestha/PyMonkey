@@ -369,9 +369,9 @@ class CompilerTest(unittest.TestCase):
                 self.assertIsNone(err,
                     msg=f'constant {i} - check_string_object failed: {err}')
             elif isinstance(constant, Instructions):
-                self.assertTrue(instance(actual[i], CompiledFunction),
+                self.assertTrue(isinstance(actual[i], CompiledFunction),
                     msg=f'constant {i} - not a function: {actual[i]}')
-                err = self.check_instructions(constant, expected.instructions)
+                err = self.check_instructions(constant, expected[i])
                 self.assertIsNone(err, 
                     msg=f'constant {i} - check_instructions failed: {err}')
         return None

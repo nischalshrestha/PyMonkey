@@ -202,6 +202,19 @@ class Compiler:
             if err != None:
                 return err
             self.emit(code.OpIndex)
+        elif isinstance(node, ast.FunctionLiteral):
+            self.enter_scope()
+            err = self.compile(node.body)
+            if err != None:
+                return err
+            instructions = self.leave_scope()
+            compiled_fn = CompiledFunction(instructions)
+            self.emit(code.OpConstant, self.add_constant(compiled_fn))
+        elif isinstance(node, ast.ReturnStatement):
+            err = self.compile(node.return_value)
+            if err != None:
+                return err
+            self.emit(code.OpReturnValue)
         return None
 
     def last_instruction_is_pop(self):
