@@ -16,9 +16,13 @@ class Bytecode(NamedTuple):
     instructions: code.Instructions
     constants: List[Object]
 
-class EmittedInstruction(NamedTuple):
+class EmittedInstruction:
     opcode: bytes
     position: int
+
+    def __init__(self, opcode, position):
+        self.opcode = opcode
+        self.position = position
 
 class CompilationScope:
     instructions: bytearray
@@ -111,7 +115,7 @@ class Compiler:
                 return  err
             # We get rid of an additional OpPop generated bc of the consequence
             # expression; we want to keep the value of expression.
-            if self.last_instruction_is_pop():
+            if self.last_instruction_is(code.OpPop):
                 self.remove_last_pop()
             # Emit an 'OpJump' with bogus value
             jump_pos = self.emit(code.OpJump, 9999)
@@ -126,7 +130,7 @@ class Compiler:
                 err = self.compile(node.alternative)
                 if err != None:
                     return err
-                if self.last_instruction_is_pop():
+                if self.last_instruction_is(code.OpPop):
                     self.remove_last_pop()
             # Patch operand of OpJump
             after_alternative_pos = len(self.current_instructions())
@@ -207,6 +211,10 @@ class Compiler:
             err = self.compile(node.body)
             if err != None:
                 return err
+            if self.last_instruction_is(code.OpPop):
+                self.replace_last_pop_with_return() 
+            if not self.last_instruction_is(code.OpReturnValue):
+                self.emit(code.OpReturn)
             instructions = self.leave_scope()
             compiled_fn = CompiledFunction(instructions)
             self.emit(code.OpConstant, self.add_constant(compiled_fn))
@@ -217,8 +225,15 @@ class Compiler:
             self.emit(code.OpReturnValue)
         return None
 
-    def last_instruction_is_pop(self):
-        return self.scopes[self.scope_index].last_instruction.opcode == code.OpPop
+    def replace_last_pop_with_return(self):
+        last_pos = self.scopes[self.scope_index].last_instruction.position
+        self.replace_instruction(last_pos, code.Make(code.OpReturnValue))
+        self.scopes[self.scope_index].last_instruction.opcode = code.OpReturnValue
+
+    def last_instruction_is(self, op):
+        if len(self.current_instructions()) == 0:
+            return False
+        return self.scopes[self.scope_index].last_instruction.opcode == op
     
     def remove_last_pop(self):
         last = self.scopes[self.scope_index].last_instruction
@@ -230,7 +245,8 @@ class Compiler:
 
     def add_constant(self, obj):
         """
-        Add a given Object to the constant pool, currently just Integer(s)
+        Add a given Object to the constant pool, currently Integer(s) and 
+        CompiledFunction(s)
         """
         self.constants.append(obj)
         return len(self.constants) - 1

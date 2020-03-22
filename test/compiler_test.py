@@ -289,7 +289,7 @@ class CompilerTest(unittest.TestCase):
             CompilerTestCase(
                 "fn() { return 5 + 10 }",
                 [
-                    5, 
+                    5,
                     10,
                     Instructions(
                         Make(OpConstant, 0) +
@@ -299,7 +299,44 @@ class CompilerTest(unittest.TestCase):
                     )
                 ],
                 Make(OpConstant, 2) + Make(OpPop)
-            )
+            ),
+            CompilerTestCase(
+                "fn() { 5 + 10 }",
+                [
+                    5,
+                    10,
+                    Instructions(
+                        Make(OpConstant, 0) + 
+                        Make(OpConstant, 1) + 
+                        Make(OpAdd) +
+                        Make(OpReturnValue)
+                    )
+                ],
+                Make(OpConstant, 2) + Make(OpPop)
+            ),
+            CompilerTestCase(
+                "fn() { 1; 2 }",
+                [
+                    1,
+                    2,
+                    Instructions(
+                        Make(OpConstant, 0) + 
+                        Make(OpPop) + 
+                        Make(OpConstant, 1) +
+                        Make(OpReturnValue)
+                    )
+                ],
+                Make(OpConstant, 2) + Make(OpPop)
+            ),
+            CompilerTestCase(
+                "fn() {  }",
+                [
+                    Instructions(
+                        Make(OpReturn)
+                    )
+                ],
+                Make(OpConstant, 0) + Make(OpPop)
+            ),
         ]
         self.run_compiler_tests(tests)
     
@@ -354,6 +391,7 @@ class CompilerTest(unittest.TestCase):
             msg=f'wrong instruction length.\nwant=\n{str(expected)}\ngot=\n{str(actual)}')
         self.assertEqual(actual.instructions, expected.instructions, 
                 msg=f'wrong instruction \nwant=\n{str(expected)}\ngot=\n{str(actual)}')
+        # print(actual, expected)
         return None
     
     def check_constants(self, expected, actual):
