@@ -340,6 +340,42 @@ class CompilerTest(unittest.TestCase):
         ]
         self.run_compiler_tests(tests)
     
+    def test_function_calls(self):
+        tests = [
+            CompilerTestCase(
+                "fn() { 24 }();",
+                [
+                    24,
+                    Instructions(
+                        Make(OpConstant, 0) +
+                        Make(OpReturnValue)
+                    )
+                ],
+                Make(OpConstant, 1) +
+                Make(OpCall) +
+                Make(OpPop)
+            ),
+            CompilerTestCase(
+                """
+                let noArg = fn() { 24 };
+                noArg();
+                """,
+                [
+                    24,
+                    Instructions(
+                        Make(OpConstant, 0) +
+                        Make(OpReturnValue)
+                    )
+                ],
+                Make(OpConstant, 1) +
+                Make(OpSetGlobal, 0) +
+                Make(OpGetGlobal, 0) +
+                Make(OpCall) +
+                Make(OpPop)
+            )
+        ]
+        self.run_compiler_tests(tests)
+    
     def test_compiler_scopes(self):
         compiler = c.new()
         self.assertEqual(compiler.scope_index, 0, 

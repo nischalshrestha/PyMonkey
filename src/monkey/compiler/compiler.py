@@ -223,6 +223,11 @@ class Compiler:
             if err != None:
                 return err
             self.emit(code.OpReturnValue)
+        elif isinstance(node, ast.CallExpression):
+            err = self.compile(node.function)
+            if err != None:
+                return err
+            self.emit(code.OpCall)
         return None
 
     def replace_last_pop_with_return(self):
