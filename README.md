@@ -1,6 +1,6 @@
 # PyMonkey
 
-### Description
+## Description
 
 Python version of the [Monkey](https://interpreterbook.com/#the-monkey-programming-language) programming language:
 
@@ -8,11 +8,11 @@ Python version of the [Monkey](https://interpreterbook.com/#the-monkey-programmi
 
 **NOTE:** This is a personal project created for the sole purpose of learning how to build interpreters / compilers and honing my Python skills. You may borrow code under the licence.
 
-### Dependencies
+## Dependencies
 
 - Python 3.6+
 
-### Execution
+## Execution
 
 Inside the [src/monkey](https://github.com/nischalshrestha/PyMonkey/tree/master/src/monkey):
 
@@ -28,23 +28,23 @@ Ultimately, to compile a Monkey file, this command will be used instead:
 
 `python main.py [Program.mnk] [args]`
 
-### Testing
+## Testing
 
 Inside the [test](https://github.com/nischalshrestha/PyMonkey/tree/master/test):
 
 `python [test_file].py`
 
-### Progress
+## Progress
 
-#### Interpreter
+### Interpreter
 
 - [x] Interpreter
 - [x] Built-in types and functions
 
-#### Extras
+### Extras
 - [x] Macros
 
-#### Compiler
+### Compiler
 
 - [x] Compile expressions
 - [x] Conditionals
@@ -52,7 +52,7 @@ Inside the [test](https://github.com/nischalshrestha/PyMonkey/tree/master/test):
 - [ ] Functions
 - [ ] Closures
 
-#### Possible Future extensions
+### Possible Future extensions
 - Better error handling (stack trace)
 - More operators like postfix (e.g. ++, --) or ternary
 - Default arguments to functions 
